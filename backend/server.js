@@ -1,12 +1,21 @@
-const express = require('express')
-const app = express();
-
+const app = require('./app');
 const connectDB = require('./config/db');
+const { connectRedis } = require('./config/redis');
 
 require('dotenv').config();
 
-connectDB();
+const startServer = async () => {
+  try {
+    await connectDB();
+    await connectRedis();
 
-app.listen(process.env.PORT, (req,res)=>{
-  console.log(`server in running on port ${process.env.PORT}`)
-})
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is running on port ${process.env.PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+};
+
+startServer();
