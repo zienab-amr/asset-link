@@ -1,21 +1,22 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+
 const connectDB = require('./config/db');
 const { connectRedis } = require('./config/redis');
 
-// إعداد التطبيق
+const assetRouter = require('./routes/asset.routes');
+const assetCategoryRouter = require('./routes/assetCategory.route');
+const authRoutes = require('./routes/auth.routes');
+
 const app = express();
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Routes
-const authRoutes = require('./routes/auth.routes');
-
-app.use('/api/auth', authRoutes);
-
+app.use('/asset', assetRouter);
+app.use('/assetCategory', assetCategoryRouter);
+app.use('/auth', authRoutes); 
 
 const startServer = async () => {
   try {
@@ -32,6 +33,7 @@ const startServer = async () => {
     process.exit(1); 
   }
 };
+
 startServer();
 
 module.exports = app;
