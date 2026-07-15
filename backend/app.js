@@ -1,27 +1,39 @@
-const express = require('express')
-const app = express();
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
 
 const connectDB = require('./config/db');
+const { connectRedis } = require('./config/redis');
 
-const assetRouter = require('../backend/routes/asset.routes')
-const assetCategoryRouter = require('../backend/routes/assetCategory.route')
+const assetRouter = require('./routes/asset.routes');
+const assetCategoryRouter = require('./routes/assetCategory.route');
+const authRoutes = require('./routes/auth.routes');
 
+const app = express();
+
+app.use(cors());
 app.use(express.json());
-require('dotenv').config();
-
-connectDB();
 
 app.use('/asset', assetRouter);
 app.use('/assetCategory', assetCategoryRouter);
+app.use('/auth', authRoutes); 
 
+const startServer = async () => {
+  try {
+    await connectDB();
+    await connectRedis();
 
-app.listen(process.env.PORT, ()=>{
-  console.log(`server in running on port ${process.env.PORT}`)
-})
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is running successfully on port ${PORT}`);
+    });
 
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1); 
+  }
+};
 
-
-
-
+startServer();
 
 module.exports = app;
