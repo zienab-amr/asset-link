@@ -1,8 +1,8 @@
 const Company = require("../models/company.model");
 
-const getProfile = async () => {
+const getProfile = async (companyId) => {
 
-    const company = await Company.findOne();
+    const company = await Company.findById(companyId);
 
     if (!company) {
         throw {
@@ -10,13 +10,13 @@ const getProfile = async () => {
             message: "Company not found"
         };
     }
-
+    company.password = undefined;
     return company;
 };
 
-const updateProfile = async ( data) => {
+const updateProfile = async (companyId, data) => {
 
-    const company = await Company.findOne();
+    const company = await Company.findById(companyId);
 
     if (!company) {
         throw {
