@@ -8,6 +8,7 @@ const joinWaitingList = async (waitingData) => {
 
   const waiting = await waitingListModel.create({
     ...waitingData,
+    waitingCode: `WAIT-${Date.now()}`,
     position: count + 1,
   });
 
@@ -25,6 +26,7 @@ const getWaitingListByAsset = async (assetId) => {
 
   return waitingList;
 };
+
 const removeFromWaitingList = async (id) => {
   const waiting = await waitingListModel.findById(id);
 
@@ -36,6 +38,7 @@ const removeFromWaitingList = async (id) => {
 
   return { message: "Removed successfully" };
 };
+
 const notifyFirstWaitingCompany = async (assetId) => {
   const waiting = await waitingListModel
     .findOne({
@@ -53,6 +56,7 @@ const notifyFirstWaitingCompany = async (assetId) => {
 
   return waiting;
 };
+
 module.exports = {
   joinWaitingList,
   getWaitingListByAsset,

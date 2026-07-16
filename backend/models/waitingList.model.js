@@ -5,17 +5,19 @@ const waitingListSchema = new mongoose.Schema(
     waitingCode: {
       type: String,
       unique: true,
+      required: true,
+      trim: true,
     },
 
     assetId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Asset",
+      ref: "asset",
       required: true,
     },
 
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
+      ref: "company",
       required: true,
     },
 
@@ -53,7 +55,7 @@ const waitingListSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 module.exports = mongoose.model("WaitingList", waitingListSchema);
