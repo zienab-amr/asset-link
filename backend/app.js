@@ -8,15 +8,17 @@ const { connectRedis } = require('./config/redis');
 const assetRouter = require('./routes/asset.routes');
 const assetCategoryRouter = require('./routes/assetCategory.route');
 const authRoutes = require('./routes/auth.routes');
-
+const companyRoutes = require("./routes/company.routes");
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/auth', authRoutes);
 app.use('/api/asset', assetRouter);
 app.use('/api/assetCategory', assetCategoryRouter);
-app.use('/api/auth', authRoutes);
+app.use('/api/company', companyRoutes);
+
 
 const startServer = async () => {
   try {
