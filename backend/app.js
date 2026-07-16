@@ -1,24 +1,25 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
 
-const connectDB = require('./config/db');
-const { connectRedis } = require('./config/redis');
+const connectDB = require("./config/db");
+const { connectRedis } = require("./config/redis");
 
-const assetRouter = require('./routes/asset.routes');
-const assetCategoryRouter = require('./routes/assetCategory.route');
-const authRoutes = require('./routes/auth.routes');
+const assetRouter = require("./routes/asset.routes");
+const assetCategoryRouter = require("./routes/assetCategory.route");
+const authRoutes = require("./routes/auth.routes");
 const companyRoutes = require("./routes/company.routes");
+const waitingListRoutes = require("./routes/waitingList.route");
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/asset', assetRouter);
-app.use('/api/assetCategory', assetCategoryRouter);
-app.use('/api/company', companyRoutes);
-
+app.use("/api/auth", authRoutes);
+app.use("/api/asset", assetRouter);
+app.use("/api/assetCategory", assetCategoryRouter);
+app.use("/api/company", companyRoutes);
+app.use("/api/waiting-list", waitingListRoutes);
 
 const startServer = async () => {
   try {
@@ -29,10 +30,9 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`Server is running successfully on port ${PORT}`);
     });
-
   } catch (err) {
-    console.error('Failed to start server:', err);
-    process.exit(1); 
+    console.error("Failed to start server:", err);
+    process.exit(1);
   }
 };
 
