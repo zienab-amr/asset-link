@@ -1,8 +1,13 @@
-const express = require('express')
-const router = express.Router() 
+const express = require("express");
+const router = express.Router();
 
-const {addAsset} = require('../controllers/asset.controller')
+const {
+  addAsset,
+  getAssetDetails,
+  updateAsset,
+} = require("../controllers/asset.controller");
+router.post("/addAsset", addAsset);
+router.get("/:id", getAssetDetails);
 
-router.post('/addAsset', addAsset)
-
+router.put("/:id", updateAsset);
 module.exports = router;
