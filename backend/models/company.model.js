@@ -26,15 +26,14 @@ const companySchema = new mongoose.Schema({
   companyLogo: {
     type:String
   },
-  location:{
+  companyAddress:{
     type:String,
-    required:true,
     trim: true
   },
-  license:{
+  commercialRegistrationNumber:{
     type:String,
-    required:true,
     unique: true,
+    sparse: true,
     trim: true
   },
   role: {
