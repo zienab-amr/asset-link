@@ -8,7 +8,7 @@ const { connectRedis } = require('./config/redis');
 const assetRouter = require('./routes/asset.routes');
 const assetCategoryRouter = require('./routes/assetCategory.route');
 const authRoutes = require('./routes/auth.routes');
-
+const companyRoutes = require("./routes/company.routes");
 const app = express();
 
 app.use(cors());
@@ -17,11 +17,11 @@ app.use(express.json());
 app.use('/asset', assetRouter);
 app.use('/assetCategory', assetCategoryRouter);
 app.use('/auth', authRoutes); 
-
+app.use("/company", companyRoutes);
 const startServer = async () => {
   try {
     await connectDB();
-    await connectRedis();
+    // await connectRedis();
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
