@@ -14,9 +14,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/asset', assetRouter);
-app.use('/assetCategory', assetCategoryRouter);
-app.use('/auth', authRoutes); 
+app.use('/api/asset', assetRouter);
+app.use('/api/assetCategory', assetCategoryRouter);
+app.use('/api/auth', authRoutes);
 
 const startServer = async () => {
   try {
