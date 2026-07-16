@@ -23,7 +23,7 @@ app.use('/api/company', companyRoutes);
 const startServer = async () => {
   try {
     await connectDB();
-    await connectRedis();
+    // await connectRedis();
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
@@ -33,6 +33,7 @@ const startServer = async () => {
   } catch (err) {
     console.error('Failed to start server:', err);
     process.exit(1); 
+    console.log("Redis is not running");
   }
 };
 
