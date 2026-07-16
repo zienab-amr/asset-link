@@ -1,5 +1,5 @@
-const express = require('express')
-const router = express.Router() 
+const express = require("express");
+const router = express.Router();
 
 const {addAsset,getAssets,searchAssets} = require('../controllers/asset.controller')
 

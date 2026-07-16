@@ -14,14 +14,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/asset', assetRouter);
-app.use('/assetCategory', assetCategoryRouter);
-app.use('/auth', authRoutes); 
-app.use("/company", companyRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/asset', assetRouter);
+app.use('/api/assetCategory', assetCategoryRouter);
+app.use('/api/company', companyRoutes);
+
+
 const startServer = async () => {
   try {
     await connectDB();
-    // await connectRedis();
+    await connectRedis();
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
