@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt'); 
 const companySchema = new mongoose.Schema({
   companyName: {
     type: String,
@@ -51,11 +50,5 @@ const companySchema = new mongoose.Schema({
     timestamps: true,
   }
 );
-//encrypt password before saving to database by Eman
-companySchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
 
 module.exports = mongoose.model("company", companySchema)
