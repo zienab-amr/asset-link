@@ -3,26 +3,67 @@ const assetService = require("../services/asset.service");
 const addAsset = async (req, res) => {
   try {
     const newAsset = await assetService.addAsset(req.body);
-    return res.status(201).send(newAsset);
+    return res.status(201).json({
+      success: true,
+      message: "Asset added successfully",
+      data: newAsset
+    });
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const getAssets = async (req, res) => {
+  try {
+    const assets = await assetService.getAssets();
+    
+    if(assets.length === 0 ) {
+      return res.status(200).json({
+        success: true,
+        message: "No assets available right now",
+        data: []
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: assets
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message }); 
   }
 };
 
 const getAssetDetails = async (req, res) => {
   try {
     const asset = await assetService.getAssetDetails(req.params.id);
-    return res.status(200).send(asset);
+    return res.status(200).json({
+      success: true,
+      data: asset
+    });
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json({ success: false, message: err.message });
   }
 }
+
 const getAssets = async(req,res)=>{
   try{
     const assets = await assetService.getAssets()
     return res.status(200).send(assets);
   }catch(err){
     return res.status(500).send(err.message);
+};
+
+const updateAsset = async (req, res) => {
+  try {
+    const asset = await assetService.updateAsset(req.params.id, req.body);
+    return res.status(200).json({
+      success: true,
+      message: "Asset updated successfully",
+      data: asset
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 }
 
@@ -35,7 +76,4 @@ const searchAssets = async (req,res)=>{
   }
 }
 
-
-
-
-module.exports = {addAsset,getAssets,searchAssets}
+module.exports = {addAsset, getAssets, getAssetDetails, updateAsset, getAssets, searchAssets}

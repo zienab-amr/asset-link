@@ -86,7 +86,7 @@ const searchAssets = async (query) => {
     filter.assetCategoryId = query.category;
 }
 if (query.location) {
-    filter.location = query.location;
+    filter.location = { $regex: query.location, $options: "i" };
 }
 
 if (query.status) {
@@ -111,11 +111,15 @@ if (query.priceType && (query.minPrice || query.maxPrice)) {
     return assets;
 };
 
+const getAssets = async () =>{
+  const assets = await assetModel.find()
+    return assets;
+}
 
-
-
-
-
-
-
-module.exports = {addAsset,getAssets,searchAssets}
+module.exports = {
+  addAsset,
+  getAssetDetails,
+  updateAsset,
+  getAssets,
+  searchAssets
+};
