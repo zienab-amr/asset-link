@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const bookingModel = require("../models/booking.model");
 const assetModel = require("../models/asset.model");
 const companyModel = require("../models/company.model");
@@ -42,26 +43,56 @@ const createBooking = async (bookingData) => {
   // Generate booking code
   const bookingCode = await generateBookingCode();
 
-  // Create and save
-  const newBooking = new bookingModel({
-    bookingCode,
-    assetId,
-    companyId,
-    ownerCompanyId,
-    startDate,
-    endDate,
-    priceType,
-    totalPrice,
-    notes
-  });
+  // Start transaction session
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  await newBooking.save();
+  try {
+    // Create and save booking inside transaction
+    const newBooking = new bookingModel({
+      bookingCode,
+      assetId,
+      companyId,
+      ownerCompanyId,
+      startDate,
+      endDate,
+      priceType,
+      totalPrice,
+      notes
+    });
 
-  return newBooking;
+    await newBooking.save({ session });
+
+    // Update asset status to Booked inside the same transaction
+    const updatedAsset = await assetModel.findByIdAndUpdate(
+      assetId,
+      { status: "Booked" },
+      { new: true, runValidators: true, session }
+    );
+
+    if (!updatedAsset) {
+      throw new Error("Failed to update asset status");
+    }
+
+    // Both operations succeeded — commit
+    await session.commitTransaction();
+
+    return newBooking;
+  } catch (err) {
+    // Any failure — rollback all database changes
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    // Always close the session
+    session.endSession();
+  }
 };
 
 const getBookingById = async (id) => {
-  const booking = await bookingModel.findById(id);
+  const booking = await bookingModel.findById(id)
+    .populate("assetId")
+    .populate("companyId")
+    .populate("ownerCompanyId");
 
   if (!booking) throw new Error("Booking not found");
 
