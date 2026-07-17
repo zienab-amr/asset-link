@@ -28,15 +28,27 @@ const getWaitingListByAsset = async (assetId) => {
 };
 
 const removeFromWaitingList = async (id) => {
-  const waiting = await waitingListModel.findById(id);
-
-  if (!waiting) {
+  const waitingItem = await waitingListModel.findById(id);
+  if (!waitingItem) {
     throw new Error("Waiting list item not found");
   }
 
+  const { assetId, position } = waitingItem;
+
   await waitingListModel.findByIdAndDelete(id);
 
-  return { message: "Removed successfully" };
+  await waitingListModel.updateMany(
+    { 
+      assetId: assetId, 
+      status: "Waiting", 
+      position: { $gt: position } 
+    },
+    { 
+      $inc: { position: -1 }
+    }
+  );
+
+  return { message: "Removed successfully and positions updated" };
 };
 
 const notifyFirstWaitingCompany = async (assetId) => {
