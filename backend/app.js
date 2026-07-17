@@ -11,6 +11,8 @@ const assetCategoryRouter = require("./routes/assetCategory.route");
 const companyRoutes = require("./routes/company.routes");
 const waitingListRoutes = require("./routes/waitingList.route");
 const bookingRoutes = require("./routes/booking.routes");
+const escrowRoutes = require("./routes/escrow.routes");
+const disputeRoutes = require("./routes/dispute.routes");
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use("/api/assetCategory", assetCategoryRouter);
 app.use("/api/company", companyRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use("/api/waiting-list", waitingListRoutes);
+app.use("/api/escrows", escrowRoutes);
+app.use("/api/disputes", disputeRoutes);
 
 
 const startServer = async () => {
