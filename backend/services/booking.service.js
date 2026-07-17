@@ -115,6 +115,10 @@ const updateBookingStatus = async (id, statusData) => {
     throw new Error("cancelReason is required when status is Cancelled");
   }
 
+  if (status === "Cancelled") {
+    await assetModel.findByIdAndUpdate(booking.assetId, { status: "Available" });
+  }
+
   booking.status = status;
 
   if (status === "Cancelled") {
