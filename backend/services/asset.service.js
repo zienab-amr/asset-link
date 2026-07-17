@@ -59,10 +59,31 @@ const addAsset = async (assetData) => {
   await newAsset.save();
 }
 
+// Note: a duplicated `getAssets` definition was removed here (merge leftover) - Fixed by Eman
 const getAssets = async()=>{
   return await assetModel.find().populate("companyId",).populate("assetCategoryId")
 }
 
+// Restored by Eman: definition was missing but referenced in module.exports (merge leftover)
+const getAssetDetails = async (id) => {
+  const asset = await assetModel
+    .findById(id)
+    .populate("companyId")
+    .populate("assetCategoryId");
+  if (!asset) throw new Error("Asset not found");
+  return asset;
+};
+
+// Restored by Eman: definition was missing but referenced in module.exports (merge leftover)
+const updateAsset = async (id, updateData) => {
+  const asset = await assetModel.findByIdAndUpdate(
+    id,
+    updateData,
+    { new: true, runValidators: true }
+  );
+  if (!asset) throw new Error("Asset not found");
+  return asset;
+};
 
 const searchAssets = async (query) => {
 
@@ -111,15 +132,10 @@ if (query.priceType && (query.minPrice || query.maxPrice)) {
     return assets;
 };
 
-const getAssets = async () =>{
-  const assets = await assetModel.find()
-    return assets;
-}
-
 module.exports = {
   addAsset,
+  getAssets,
   getAssetDetails,
   updateAsset,
-  getAssets,
-  searchAssets
+  searchAssets,
 };
