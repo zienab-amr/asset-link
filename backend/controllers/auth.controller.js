@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcryptjs");
 const Company = require('../models/company.model');
 const generateToken = require('../utils/generateToken');
 const authService = require('../services/auth.service');

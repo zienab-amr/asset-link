@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 const Company = require('../models/company.model');
 const generateOTP = require('../utils/otp.util');
 const sendOTPEmail = require('../utils/sendEmail.util');

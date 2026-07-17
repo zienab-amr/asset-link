@@ -57,32 +57,69 @@ const addAsset = async (assetData) => {
   });
 
   await newAsset.save();
+}
 
-  return newAsset;
+const getAssets = async()=>{
+  return await assetModel.find().populate("companyId",).populate("assetCategoryId")
+}
+
+
+const searchAssets = async (query) => {
+
+    let filter = {};
+
+    if (query.name) {
+        filter.assetName = {
+            $regex: query.name,
+            $options: "i"
+        };
+    }
+  if (query.assetCode) {
+
+    filter.assetCode = {
+        $regex: query.assetCode,
+        $options: "i"
+    };
+
+  }
+  if (query.category) {
+    filter.assetCategoryId = query.category;
+}
+if (query.location) {
+    filter.location = { $regex: query.location, $options: "i" };
+}
+
+if (query.status) {
+    filter.status = query.status;
+}
+if (query.priceType && (query.minPrice || query.maxPrice)) {
+
+    const price = `price.${query.priceType}`;
+
+    filter[price] = {};
+
+    if (query.minPrice) {
+        filter[price].$gte = Number(query.minPrice);
+    }
+
+    if (query.maxPrice) {
+        filter[price].$lte = Number(query.maxPrice);
+    }
+}
+    const assets = await assetModel.find(filter).populate("companyId",).populate("assetCategoryId");
+
+    return assets;
 };
 
-const getAssetDetails = async (id) => {
-  const asset = await assetModel.findById(id);
-
-  if (!asset) throw new Error("Asset not found");
-
-  return asset;
-};
-
-const updateAsset = async (id, assetData) => {
-  const asset = await assetModel.findById(id);
-
-  if (!asset) throw new Error("Asset not found");
-
-  const updatedAsset = await assetModel.findByIdAndUpdate(id, assetData, {
-    new: true,
-  });
-
-  return updatedAsset;
-};
+const getAssets = async () =>{
+  const assets = await assetModel.find()
+    return assets;
+}
 
 module.exports = {
   addAsset,
   getAssetDetails,
   updateAsset,
+  getAssets,
+  searchAssets
 };
