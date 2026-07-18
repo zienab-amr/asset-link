@@ -14,6 +14,7 @@ const bookingRoutes = require("./routes/booking.routes");
 const negotiationRoutes = require('./controllers/negotiation.controller')
 const contractRoutes = require("./routes/contract.routes");
 const escrowRoutes = require("./routes/escrow.routes"); // Added by Eman
+const inspectionRoutes = require("./routes/inspection.routes");
 const rentalCompletionRoutes = require("./routes/rentalCompletion.routes");
 const companyDashboardRoutes = require("./routes/companyDashboard.routes");
 const revenueReportRoutes = require("./routes/revenueReport.routes");
@@ -37,6 +38,7 @@ app.use("/api/waiting-list", waitingListRoutes);
 app.use("/api/negotiation", negotiationRoutes)
 app.use("/api/contracts", contractRoutes);
 app.use("/api/escrow", escrowRoutes); // Added by Eman
+app.use("/api/inspection", inspectionRoutes)
 app.use("/api/rental-completion", rentalCompletionRoutes);
 app.use("/api/company-dashboard", companyDashboardRoutes);
 app.use("/api/revenue-reports", revenueReportRoutes);
@@ -49,7 +51,7 @@ app.use("/api/assetHealth", assetHealthRoutes);
 const startServer = async () => {
   try {
     await connectDB();
-    await connectRedis();
+    // await connectRedis();
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
