@@ -59,9 +59,13 @@ const addAsset = async (assetData) => {
   await newAsset.save();
 }
 
-const getAssets = async()=>{
-  return await assetModel.find().populate("companyId",).populate("assetCategoryId")
-}
+const getAssets = async () => {
+  const assets = await assetModel.find()
+    .populate("companyId")
+    .populate("assetCategoryId");
+    
+  return assets;
+};
 
 
 const searchAssets = async (query) => {
@@ -111,15 +115,32 @@ if (query.priceType && (query.minPrice || query.maxPrice)) {
     return assets;
 };
 
-const getAssets = async () =>{
-  const assets = await assetModel.find()
-    return assets;
-}
+const getAssetDetails = async (id) => {
+  const asset = await assetModel.findById(id)
+    .populate("companyId")
+    .populate("assetCategoryId");
+    
+  if (!asset) throw new Error("Asset not found");
+  
+  return asset;
+};
+
+const updateAsset = async (id, updateData) => {
+  const updatedAsset = await assetModel.findByIdAndUpdate(
+    id, 
+    updateData, 
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedAsset) throw new Error("Asset not found");
+  
+  return updatedAsset;
+};
 
 module.exports = {
   addAsset,
   getAssetDetails,
   updateAsset,
   getAssets,
-  searchAssets
+  searchAssets,
 };

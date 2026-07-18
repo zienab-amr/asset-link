@@ -46,14 +46,6 @@ const getAssetDetails = async (req, res) => {
   }
 }
 
-const getAssets = async(req,res)=>{
-  try{
-    const assets = await assetService.getAssets()
-    return res.status(200).send(assets);
-  }catch(err){
-    return res.status(500).send(err.message);
-};
-
 const updateAsset = async (req, res) => {
   try {
     const asset = await assetService.updateAsset(req.params.id, req.body);
@@ -76,4 +68,4 @@ const searchAssets = async (req,res)=>{
   }
 }
 
-module.exports = {addAsset, getAssets, getAssetDetails, updateAsset, getAssets, searchAssets}
+module.exports = {addAsset, getAssetDetails, updateAsset, getAssets, searchAssets}
