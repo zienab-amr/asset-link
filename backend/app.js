@@ -19,8 +19,6 @@ const companyDashboardRoutes = require("./routes/companyDashboard.routes");
 const revenueReportRoutes = require("./routes/revenueReport.routes");
 const disputeRoutes = require("./routes/dispute.routes");
 const paymentRoutes = require("./routes/payment.routes");
-const rentalCompletionRoutes = require("./routes/rentalCompletion.routes");
-
 
 const app = express();
 
@@ -41,7 +39,6 @@ app.use("/api/company-dashboard", companyDashboardRoutes);
 app.use("/api/revenue-reports", revenueReportRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/payment", paymentRoutes);
-app.use("/api/rental-completion", rentalCompletionRoutes);
 
 
 const startServer = async () => {
