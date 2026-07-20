@@ -13,6 +13,7 @@ const waitingListRoutes = require("./routes/waitingList.route");
 const bookingRoutes = require("./routes/booking.routes");
 const negotiationRoutes = require('./controllers/negotiation.controller')
 const contractRoutes = require("./routes/contract.routes");
+const escrowRoutes = require("./routes/escrow.routes"); // Added by Eman
 
 const app = express();
 
@@ -27,6 +28,8 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/waiting-list", waitingListRoutes);
 app.use("/api/negotiation", negotiationRoutes)
 app.use("/api/contracts", contractRoutes);
+app.use("/api/escrow", escrowRoutes); // Added by Eman
+
 
 const startServer = async () => {
   try {
