@@ -1,45 +1,93 @@
 const escrowService = require("../services/escrow.service");
 
+// POST /escrow - by Eman
 const createEscrow = async (req, res) => {
   try {
-    const newEscrow = await escrowService.createEscrow(req.body);
-    return res.status(201).send(newEscrow);
+    const escrow = await escrowService.createEscrow(req.body);
+    return res.status(201).json({
+      success: true,
+      message: "Escrow created and amount held successfully",
+      data: escrow,
+    });
   } catch (err) {
-    if (err.message.includes("not found")) {
-      return res.status(404).send({ error: err.message });
-    }
-    if (err.message.includes("required") || err.message.includes("Invalid")) {
-      return res.status(400).send({ error: err.message });
-    }
-    return res.status(500).send({ error: err.message });
+    const status = err.statusCode || 500;
+    return res.status(status).json({ success: false, message: err.message });
   }
 };
 
+// GET /escrow/:id - by Eman
+const getEscrow = async (req, res) => {
+  try {
+    const escrow = await escrowService.getEscrowById(req.params.id);
+    return res.status(200).json({ success: true, data: escrow });
+  } catch (err) {
+    const status = err.statusCode || 500;
+    return res.status(status).json({ success: false, message: err.message });
+  }
+};
+
+// GET /escrow/contract/:contractId - by Eman
+const getEscrowByContract = async (req, res) => {
+  try {
+    const escrow = await escrowService.getEscrowByContract(
+      req.params.contractId
+    );
+    return res.status(200).json({ success: true, data: escrow });
+  } catch (err) {
+    const status = err.statusCode || 500;
+    return res.status(status).json({ success: false, message: err.message });
+  }
+};
+
+// GET /escrow/booking/:bookingId - by Eman
 const getEscrowByBooking = async (req, res) => {
   try {
-    const escrow = await escrowService.getEscrowByBookingId(req.params.bookingId);
-    return res.status(200).send(escrow);
+    const escrow = await escrowService.getEscrowByBooking(req.params.bookingId);
+    return res.status(200).json({ success: true, data: escrow });
   } catch (err) {
-    if (err.message.includes("not found")) {
-      return res.status(404).send({ error: err.message });
-    }
-    return res.status(500).send({ error: err.message });
+    const status = err.statusCode || 500;
+    return res.status(status).json({ success: false, message: err.message });
   }
 };
 
+// PATCH /escrow/:id/status - by Eman
+const updateEscrowStatus = async (req, res) => {
+  try {
+    const escrow = await escrowService.updateEscrowStatus(
+      req.params.id,
+      req.body.status
+    );
+    return res.status(200).json({
+      success: true,
+      message: "Escrow status updated successfully",
+      data: escrow,
+    });
+  } catch (err) {
+    const status = err.statusCode || 500;
+    return res.status(status).json({ success: false, message: err.message });
+  }
+};
+
+// PATCH /escrow/booking/:bookingId/release
 const releaseMoney = async (req, res) => {
   try {
     const escrow = await escrowService.releaseMoney(req.params.bookingId);
-    return res.status(200).send(escrow);
+    return res.status(200).json({
+      success: true,
+      message: "Escrow money released successfully",
+      data: escrow,
+    });
   } catch (err) {
-    if (err.message.includes("not found")) {
-      return res.status(404).send({ error: err.message });
-    }
-    if (err.message.includes("required") || err.message.includes("Invalid")) {
-      return res.status(400).send({ error: err.message });
-    }
-    return res.status(500).send({ error: err.message });
+    const status = err.statusCode || 500;
+    return res.status(status).json({ success: false, message: err.message });
   }
 };
 
-module.exports = { createEscrow, getEscrowByBooking, releaseMoney };
+module.exports = {
+  createEscrow,
+  getEscrow,
+  getEscrowByContract,
+  getEscrowByBooking,
+  updateEscrowStatus,
+  releaseMoney,
+};

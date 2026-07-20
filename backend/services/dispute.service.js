@@ -73,9 +73,7 @@ const resolveDispute = async (disputeId, resolveData) => {
     const escrow = await escrowModel.findOne({ bookingId: dispute.bookingId });
     if (!escrow) throw new Error("Escrow not found");
 
-    escrow.status = "Refunded";
-    await escrow.save();
-    updatedEscrow = escrow;
+    updatedEscrow = await escrowService.updateEscrowStatus(escrow._id, "Refunded");
   }
 
   return { dispute, escrow: updatedEscrow };
