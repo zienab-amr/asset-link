@@ -11,6 +11,10 @@ const assetCategoryRouter = require("./routes/assetCategory.route");
 const companyRoutes = require("./routes/company.routes");
 const waitingListRoutes = require("./routes/waitingList.route");
 const bookingRoutes = require("./routes/booking.routes");
+const negotiationRoutes = require('./controllers/negotiation.controller')
+const contractRoutes = require("./routes/contract.routes");
+const escrowRoutes = require("./routes/escrow.routes"); // Added by Eman
+const disputeRoutes = require("./routes/dispute.routes");
 const paymentRoutes = require("./routes/payment.routes");
 
 const app = express();
@@ -22,15 +26,18 @@ app.use("/api/auth", authRoutes);
 app.use("/api/asset", assetRouter);
 app.use("/api/assetCategory", assetCategoryRouter);
 app.use("/api/company", companyRoutes);
-app.use('/api/bookings', bookingRoutes);
+app.use("/api/bookings", bookingRoutes);
 app.use("/api/waiting-list", waitingListRoutes);
+app.use("/api/negotiation", negotiationRoutes)
+app.use("/api/contracts", contractRoutes);
+app.use("/api/escrow", escrowRoutes); // Added by Eman
+app.use("/api/disputes", disputeRoutes);
 app.use("/api/payment", paymentRoutes);
-
 
 const startServer = async () => {
   try {
     await connectDB();
-    // await connectRedis();
+    await connectRedis();
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
