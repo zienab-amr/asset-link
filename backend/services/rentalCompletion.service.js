@@ -1,5 +1,6 @@
 const bookingModel = require("../models/booking.model");
 const assetModel = require("../models/asset.model");
+const contractModel = require("../models/contract.model");
 const bookingService = require("./booking.service");
 
 // TODO: Import external models when merged by teammates
@@ -56,7 +57,14 @@ const completeRental = async (bookingId) => {
     { new: true }
   );
 
-  return { booking: updatedBooking, asset: updatedAsset };
+  // Update Contract status to "Completed"
+  const updatedContract = await contractModel.findOneAndUpdate(
+    { bookingId: booking._id },
+    { status: "Completed" },
+    { new: true }
+  );
+
+  return { booking: updatedBooking, asset: updatedAsset, contract: updatedContract };
 };
 
 module.exports = {
