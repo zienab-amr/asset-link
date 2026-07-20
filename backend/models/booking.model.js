@@ -47,6 +47,10 @@ const bookingSchema = new mongoose.Schema({
     trim: true
   },
 
+  returnedAt: {
+    type: Date
+  },
+
   notes: {
     type: String,
     trim: true
