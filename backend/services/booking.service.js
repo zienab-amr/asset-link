@@ -139,8 +139,104 @@ const updateBookingStatus = async (id, statusData) => {
   return booking;
 };
 
+// ====== Booking history & cancellation - Modified by Eman ======
+
+// Company bookings: bookings on MY assets (I am the owner) - by Eman
+const getCompanyBookings = async (companyId) => {
+  const bookings = await bookingModel
+    .find({ ownerCompanyId: companyId })
+    .populate("assetId", "assetName assetCode assetImages status")
+    .populate("companyId", "companyName companyEmail")
+    .sort({ createdAt: -1 });
+  return bookings;
+};
+
+// My bookings: bookings MY company made (I am the renter) - by Eman
+const getMyBookings = async (companyId) => {
+  const bookings = await bookingModel
+    .find({ companyId })
+    .populate("assetId", "assetName assetCode assetImages status")
+    .populate("ownerCompanyId", "companyName companyEmail")
+    .sort({ createdAt: -1 });
+  return bookings;
+};
+
+// Cancel a booking (only the renter or the owner can cancel) - by Eman
+const cancelBooking = async (id, cancelReason, userId) => {
+  if (!mongoose.isValidObjectId(id)) {
+    const e = new Error("Invalid booking id");
+    e.statusCode = 400;
+    throw e;
+  }
+
+  if (!cancelReason || !cancelReason.trim()) {
+    const e = new Error("Cancel reason is required");
+    e.statusCode = 400;
+    throw e;
+  }
+
+  const booking = await bookingModel.findById(id);
+  if (!booking) {
+    const e = new Error("Booking not found");
+    e.statusCode = 404;
+    throw e;
+  }
+
+  // only the renter (companyId) or the owner (ownerCompanyId) can cancel - by Eman
+  const isRenter = booking.companyId.toString() === userId;
+  const isOwner = booking.ownerCompanyId.toString() === userId;
+  if (!isRenter && !isOwner) {
+    const e = new Error("Not allowed to cancel this booking");
+    e.statusCode = 403;
+    throw e;
+  }
+
+  if (booking.status === "Cancelled") {
+    const e = new Error("Booking is already cancelled");
+    e.statusCode = 400;
+    throw e;
+  }
+  if (booking.status === "Completed") {
+    const e = new Error("Cannot cancel a completed booking");
+    e.statusCode = 400;
+    throw e;
+  }
+  if (new Date(booking.startDate) < new Date()) {
+    const e = new Error("Cannot cancel a booking that has already started");
+    e.statusCode = 400;
+    throw e;
+  }
+
+  // use a transaction so booking + asset update are atomic (same pattern as createBooking) - by Eman
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    booking.status = "Cancelled";
+    booking.cancelReason = cancelReason.trim();
+    await booking.save({ session });
+
+    // return the asset to Available after cancellation - by Eman
+    await assetModel.findByIdAndUpdate(
+      booking.assetId,
+      { status: "Available" },
+      { new: true, session }
+    );
+
+    await session.commitTransaction();
+    return booking;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
+};
+
 module.exports = {
   createBooking,
   getBookingById,
   updateBookingStatus,
+  getCompanyBookings, // Added by Eman
+  getMyBookings,      // Added by Eman
+  cancelBooking,      // Added by Eman
 };
