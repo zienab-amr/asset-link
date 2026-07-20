@@ -1,4 +1,49 @@
 const contractModel = require("../models/contract.model");
+const bookingModel = require("../models/booking.model");
+const generateContractCode = require("../utils/generateContractCode");
+
+const createContract = async (contractData) => {
+  const { bookingId, securityDeposit } = contractData;
+
+  if (!bookingId) {
+    throw new Error("bookingId is required");
+  }
+
+  if (securityDeposit === undefined || securityDeposit === null) {
+    throw new Error("securityDeposit is required");
+  }
+
+  const booking = await bookingModel.findById(bookingId);
+
+  if (!booking) {
+    throw new Error("Booking not found");
+  }
+
+  const existingContract = await contractModel.findOne({ bookingId });
+
+  if (existingContract) {
+    throw new Error("Contract already exists for this booking");
+  }
+
+  const contractCode = await generateContractCode();
+
+  const contract = new contractModel({
+    contractCode,
+    bookingId: booking._id,
+    assetId: booking.assetId,
+    companyId: booking.companyId,
+    ownerCompanyId: booking.ownerCompanyId,
+    startDate: booking.startDate,
+    endDate: booking.endDate,
+    totalPrice: booking.totalPrice,
+    securityDeposit,
+    status: "Draft",
+  });
+
+  await contract.save();
+
+  return contract;
+};
 
 const getAllContracts = async () => {
   const contracts = await contractModel
@@ -73,6 +118,7 @@ const rejectContract = async (id, userId) => {
 };
 
 module.exports = {
+  createContract,
   getAllContracts,
   getContractById,
   approveContract,
