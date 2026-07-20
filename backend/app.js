@@ -11,6 +11,7 @@ const assetCategoryRouter = require("./routes/assetCategory.route");
 const companyRoutes = require("./routes/company.routes");
 const waitingListRoutes = require("./routes/waitingList.route");
 const bookingRoutes = require("./routes/booking.routes");
+const negotiationRoutes = require('./controllers/negotiation.controller')
 const contractRoutes = require("./routes/contract.routes");
 
 const app = express();
@@ -24,12 +25,13 @@ app.use("/api/assetCategory", assetCategoryRouter);
 app.use("/api/company", companyRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/waiting-list", waitingListRoutes);
+app.use("/api/negotiation", negotiationRoutes)
 app.use("/api/contracts", contractRoutes);
 
 const startServer = async () => {
   try {
     await connectDB();
-    // await connectRedis();
+    await connectRedis();
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
