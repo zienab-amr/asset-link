@@ -62,7 +62,7 @@ const createEscrow = async (data) => {
   }
 
  
-const rentalAmount = contract.finalPrice;
+const rentalAmount = contract.totalPrice;
 const securityDeposit = contract.securityDeposit;
 
   if (rentalAmount === undefined || rentalAmount === null) {
