@@ -5,8 +5,7 @@ const contractModel = require("../models/contract.model");
 
 const VALID_STATUSES = ["Held", "Frozen", "Released", "Refunded", "Cancelled"];
 const FINAL_STATUSES = ["Released", "Refunded", "Cancelled"];
-const APPROVED_STATUSES = ["Active", "Approved"]; // contract must be approved/active - by Eman
-
+const APPROVED_STATUSES = ["Active"]; // contract must be Active - matches contract.model.js enum exactly - by Eman
 // generate a unique escrow code like ESC-0001 - by Eman
 const generateEscrowCode = async () => {
   const lastEscrow = await escrowModel.findOne().sort({ createdAt: -1 });
@@ -62,11 +61,9 @@ const createEscrow = async (data) => {
     throw makeError("Escrow already exists for this contract", 400);
   }
 
-  // 🔒 SECURITY FIX: take the amounts from the CONTRACT record itself, never from the client.
-  // TODO: تأكدي إن أسماء الفيلدز دي (finalPrice / securityDeposit) مطابقة فعلاً
-  // لأسماء الفيلدز في contract.model.js بتاعك، وعدليها هنا لو مختلفة.
-  const rentalAmount = contract.finalPrice;
-  const securityDeposit = contract.securityDeposit;
+ 
+const rentalAmount = contract.finalPrice;
+const securityDeposit = contract.securityDeposit;
 
   if (rentalAmount === undefined || rentalAmount === null) {
     throw makeError("Contract does not have a valid rental amount", 400);
