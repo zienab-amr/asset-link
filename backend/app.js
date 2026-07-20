@@ -13,6 +13,7 @@ const waitingListRoutes = require("./routes/waitingList.route");
 const bookingRoutes = require("./routes/booking.routes");
 const contractRoutes = require("./routes/contract.routes");
 const deliveryRoutes = require("./routes/delivery.routes");
+const maintenanceRoutes = require("./routes/maintenance.routes");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/waiting-list", waitingListRoutes);
 app.use("/api/contracts", contractRoutes);
 app.use("/api/deliveries", deliveryRoutes);
+app.use("/api/maintenances", maintenanceRoutes);
 
 const startServer = async () => {
   try {
