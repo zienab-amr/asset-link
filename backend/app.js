@@ -17,6 +17,7 @@ const escrowRoutes = require("./routes/escrow.routes"); // Added by Eman
 const rentalCompletionRoutes = require("./routes/rentalCompletion.routes");
 const companyDashboardRoutes = require("./routes/companyDashboard.routes");
 const revenueReportRoutes = require("./routes/revenueReport.routes");
+const penaltyRoutes = require("./routes/penalty.routes");
 const disputeRoutes = require("./routes/dispute.routes");
 const paymentRoutes = require("./routes/payment.routes");
 
@@ -37,6 +38,7 @@ app.use("/api/escrow", escrowRoutes); // Added by Eman
 app.use("/api/rental-completion", rentalCompletionRoutes);
 app.use("/api/company-dashboard", companyDashboardRoutes);
 app.use("/api/revenue-reports", revenueReportRoutes);
+app.use("/api/penalty", penaltyRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/payment", paymentRoutes);
 

@@ -215,6 +215,30 @@ const releaseMoney = async (bookingId) => {
   return await updateEscrowStatus(escrow._id, "Released");
 };
 
+// DEDUCT PENALTY from security deposit (Added for Penalty & Maintenance module)
+const deductPenaltyFromDeposit = async (bookingId, penaltyAmount) => {
+  if (!mongoose.isValidObjectId(bookingId)) throw makeError("Invalid bookingId", 400);
+  
+  if (penaltyAmount < 0) {
+    throw makeError("Penalty amount cannot be negative", 400);
+  }
+
+  const escrow = await escrowModel.findOne({ bookingId });
+  if (!escrow) throw makeError("Escrow not found for this booking", 404);
+
+  // Business Rule: Penalty cannot exceed the available security deposit
+  if (penaltyAmount > escrow.securityDeposit) {
+    throw makeError("Penalty cannot exceed the available security deposit", 400);
+  }
+
+  // Deduct from deposit and totalHeld (keep rentalAmount untouched)
+  escrow.securityDeposit -= penaltyAmount;
+  escrow.totalHeld -= penaltyAmount;
+  
+  await escrow.save();
+  return escrow;
+};
+
 module.exports = {
   createEscrow,
   getEscrowById,
@@ -223,4 +247,5 @@ module.exports = {
   updateEscrowStatus,
   freezeMoney,
   releaseMoney,
+  deductPenaltyFromDeposit,
 };
