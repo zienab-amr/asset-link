@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bookingModel = require("../models/booking.model");
 const assetModel = require("../models/asset.model");
 const companyModel = require("../models/company.model");
+const disputeModel = require("../models/dispute.model");
 const generateBookingCode = require("../utils/generateBookingCode");
 
 const VALID_PRICE_TYPES = ["Daily", "Weekly", "Monthly"];
@@ -108,6 +109,14 @@ const updateBookingStatus = async (id, statusData) => {
   // Validation — status enum
   if (!VALID_STATUSES.includes(status)) {
     throw new Error("Invalid status. Must be one of: Pending, Confirmed, Rejected, Cancelled, Completed");
+  }
+
+  // If Completed, block transition if an open dispute exists
+  if (status === "Completed") {
+    const openDispute = await disputeModel.findOne({ bookingId: id, status: "Open" });
+    if (openDispute) {
+      throw new Error("Invalid status transition. Cannot complete booking while an open dispute exists");
+    }
   }
 
   // If Cancelled, cancelReason is required

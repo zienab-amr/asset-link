@@ -69,4 +69,4 @@ const searchAssets = async (req,res)=>{
   }
 }
 
-module.exports = { addAsset, getAssets, getAssetDetails, updateAsset, searchAssets };
+module.exports = {addAsset, getAssetDetails, updateAsset, getAssets, searchAssets}
