@@ -68,10 +68,26 @@ const updateEscrowStatus = async (req, res) => {
   }
 };
 
+// PATCH /escrow/booking/:bookingId/release
+const releaseMoney = async (req, res) => {
+  try {
+    const escrow = await escrowService.releaseMoney(req.params.bookingId);
+    return res.status(200).json({
+      success: true,
+      message: "Escrow money released successfully",
+      data: escrow,
+    });
+  } catch (err) {
+    const status = err.statusCode || 500;
+    return res.status(status).json({ success: false, message: err.message });
+  }
+};
+
 module.exports = {
   createEscrow,
   getEscrow,
   getEscrowByContract,
   getEscrowByBooking,
   updateEscrowStatus,
+  releaseMoney,
 };

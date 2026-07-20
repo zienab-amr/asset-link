@@ -14,7 +14,10 @@ const bookingRoutes = require("./routes/booking.routes");
 const negotiationRoutes = require('./controllers/negotiation.controller')
 const contractRoutes = require("./routes/contract.routes");
 const escrowRoutes = require("./routes/escrow.routes"); // Added by Eman
+const disputeRoutes = require("./routes/dispute.routes");
+const paymentRoutes = require("./routes/payment.routes");
 const rentalCompletionRoutes = require("./routes/rentalCompletion.routes");
+
 
 const app = express();
 
@@ -30,6 +33,8 @@ app.use("/api/waiting-list", waitingListRoutes);
 app.use("/api/negotiation", negotiationRoutes)
 app.use("/api/contracts", contractRoutes);
 app.use("/api/escrow", escrowRoutes); // Added by Eman
+app.use("/api/disputes", disputeRoutes);
+app.use("/api/payment", paymentRoutes);
 app.use("/api/rental-completion", rentalCompletionRoutes);
 
 

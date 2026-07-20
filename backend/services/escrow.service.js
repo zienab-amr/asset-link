@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const escrowModel = require("../models/escrow.model");
 const bookingModel = require("../models/booking.model");
 const contractModel = require("../models/contract.model");
+const disputeModel = require("../models/dispute.model");
 
 const VALID_STATUSES = ["Held", "Frozen", "Released", "Refunded", "Cancelled"];
 const FINAL_STATUSES = ["Released", "Refunded", "Cancelled"];
@@ -171,10 +172,55 @@ const updateEscrowStatus = async (id, newStatus) => {
   return escrow;
 };
 
+// FREEZE escrow money when a dispute is opened
+const freezeMoney = async (escrowId) => {
+  if (!mongoose.isValidObjectId(escrowId)) throw makeError("Invalid escrow id", 400);
+
+  const escrow = await escrowModel.findById(escrowId);
+  if (!escrow) throw makeError("Escrow not found", 404);
+
+  // Idempotent — if already Frozen, just return current state
+  if (escrow.status === "Frozen") {
+    return escrow;
+  }
+
+  // Freeze escrow only if it's not finalized (handled by Eman's updateEscrowStatus)
+  return await updateEscrowStatus(escrowId, "Frozen");
+};
+
+// RELEASE money to the owner company
+const releaseMoney = async (bookingId) => {
+  if (!mongoose.isValidObjectId(bookingId)) throw makeError("Invalid bookingId", 400);
+
+  // Validate booking exists
+  const booking = await bookingModel.findById(bookingId);
+  if (!booking) throw makeError("Booking not found", 404);
+
+  // Business Rule: Cannot release before contract is Completed
+  if (booking.status !== "Completed") {
+    throw makeError("Invalid operation. Cannot release money before booking is completed", 400);
+  }
+
+  // Business Rule: Cannot release money while an open dispute exists
+  const openDispute = await disputeModel.findOne({ bookingId, status: "Open" });
+  if (openDispute) {
+    throw makeError("Invalid operation. Cannot release money while an open dispute exists", 400);
+  }
+
+  // Find escrow for this booking
+  const escrow = await escrowModel.findOne({ bookingId });
+  if (!escrow) throw makeError("Escrow not found for this booking", 404);
+
+  // Transition to Released using Eman's method to obey all FINAL_STATUSES checks
+  return await updateEscrowStatus(escrow._id, "Released");
+};
+
 module.exports = {
   createEscrow,
   getEscrowById,
   getEscrowByContract,
   getEscrowByBooking,
   updateEscrowStatus,
+  freezeMoney,
+  releaseMoney,
 };
