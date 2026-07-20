@@ -1,6 +1,6 @@
 const Payment = require("../models/payment.model")
 const Booking = require("../models/booking.model")
-
+const escrow = require("../models/escrow.model")
 
 const createPayment =async(bookingId)=>{
     const booking = await Booking.findById(bookingId)
@@ -18,9 +18,8 @@ const createPayment =async(bookingId)=>{
     const payment = await Payment.create({
          bookingId: booking._id,
         companyId: booking.companyId,
-        amount: booking.totalPrice,
+        amount: escrow.rentelAmount,
         paymentStatus: "Pending",
-        escrowStatus: "Held"
     })
     return payment
 }

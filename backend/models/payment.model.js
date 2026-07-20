@@ -30,13 +30,6 @@ const paymentSchema = new mongoose.Schema({
         enum: ["Pending", "Completed", "Failed"],
         default: "Pending"
     },
-
-    escrowStatus: {
-        type: String,
-        enum: ["Held", "Released", "Refunded"],
-        default: "Held"
-    },
-
     paidAt: Date,
     refundedAt: Date
 
