@@ -11,7 +11,7 @@ const assetCategoryRouter = require("./routes/assetCategory.route");
 const companyRoutes = require("./routes/company.routes");
 const waitingListRoutes = require("./routes/waitingList.route");
 const bookingRoutes = require("./routes/booking.routes");
-const negotiationRoutes = require('./controllers/negotiation.controller')
+const negotiationRoutes = require('./routes/negotiation.routes');
 const contractRoutes = require("./routes/contract.routes");
 const escrowRoutes = require("./routes/escrow.routes"); // Added by Eman
 const rentalCompletionRoutes = require("./routes/rentalCompletion.routes");
@@ -20,6 +20,7 @@ const revenueReportRoutes = require("./routes/revenueReport.routes");
 const penaltyRoutes = require("./routes/penalty.routes");
 const disputeRoutes = require("./routes/dispute.routes");
 const paymentRoutes = require("./routes/payment.routes");
+const assetLifecycle = require("./routes/assetLifecycle.routes")
 const inspectorRoutes = require("./routes/inspector.routes");
 const assetHealthRoutes = require("./routes/assetHealth.routes");
 
@@ -43,6 +44,7 @@ app.use("/api/revenue-reports", revenueReportRoutes);
 app.use("/api/penalty", penaltyRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/asset-lifecycle", assetLifecycle); //added by Eman - Sprint 6
 app.use("/api/inspector", inspectorRoutes);
 app.use("/api/assetHealth", assetHealthRoutes);
 
