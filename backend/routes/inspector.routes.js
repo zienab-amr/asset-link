@@ -12,7 +12,7 @@ const roleMiddleware = require("../middleware/role.middleware"); // استدعا
 
 router.patch('/assign', authMiddleware, roleMiddleware('Company', 'Admin'), assignInspector); 
 
-router.get('/tasks/:id', authMiddleware, roleMiddleware('Inspector'), getMyTasks); 
+router.get('/tasks', authMiddleware, roleMiddleware('Inspector'), getMyTasks); 
 
 router.get('/history/:assetId', authMiddleware, getInspectionHistory); 
 
