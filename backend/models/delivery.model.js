@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+//model for delivery
 const deliverySchema = new mongoose.Schema(
   {
     deliveryCode: {

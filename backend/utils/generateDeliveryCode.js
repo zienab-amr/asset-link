@@ -1,5 +1,5 @@
 const deliveryModel = require("../models/delivery.model");
-
+// Utility function to generate a unique delivery code
 const generateDeliveryCode = async () => {
   const lastDelivery = await deliveryModel.findOne().sort({ createdAt: -1 });
 

@@ -1,5 +1,5 @@
 const deliveryService = require("../services/delivery.service");
-
+// Controller for Delivery
 const createDelivery = async (req, res) => {
   try {
     const delivery = await deliveryService.createDelivery(req.body);

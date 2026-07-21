@@ -1,5 +1,4 @@
 const express = require("express");
-
 const router = express.Router();
 
 const {
@@ -10,14 +9,18 @@ const {
   getDeliveryHistory,
 } = require("../controllers/delivery.controller");
 
-router.post("/", createDelivery);
+//middlewares
+const authMiddleware = require("../middleware/auth.middleware");
+const roleMiddleware = require("../middleware/role.middleware");
 
-router.get("/history", getDeliveryHistory);
+router.post("/", authMiddleware, roleMiddleware("Company", "Admin"), createDelivery);
 
-router.get("/:id", getDelivery);
+router.get("/history", authMiddleware, getDeliveryHistory);
 
-router.patch("/:id/status", updateDeliveryStatus);
+router.get("/:id", authMiddleware, getDelivery);
 
-router.get("/:id/timeline", getDeliveryTimeline);
+router.patch("/:id/status", authMiddleware, roleMiddleware("Company", "Admin"), updateDeliveryStatus);
+
+router.get("/:id/timeline", authMiddleware, getDeliveryTimeline);
 
 module.exports = router;
