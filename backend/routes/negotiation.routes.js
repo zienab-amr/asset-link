@@ -18,3 +18,4 @@ router.get('/:id/history', getVersionHistory);
 router.get('/company/:id/current', getCurrentNegotiation);
 router.patch('/:id/accept', acceptOffer);
 router.patch('/:id/reject', rejectOffer);
+module.exports = router;
