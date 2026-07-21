@@ -5,7 +5,7 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const { connectRedis } = require("./config/redis");
 
-// Routes Imports
+// Routes Import
 const authRoutes = require("./routes/auth.routes");
 const assetRouter = require("./routes/asset.routes");
 const assetCategoryRouter = require("./routes/assetCategory.route");

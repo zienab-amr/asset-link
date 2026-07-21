@@ -9,6 +9,7 @@ const {
   getDeliveryHistory,
 } = require("../controllers/delivery.controller");
 
+//middlewares
 const authMiddleware = require("../middleware/auth.middleware");
 const roleMiddleware = require("../middleware/role.middleware");
 

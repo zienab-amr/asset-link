@@ -54,6 +54,7 @@ const createDelivery = async (deliveryData) => {
   }
 
   // TODO:
+  
   // Check Escrow Payment after Escrow module is merged
 
   const deliveryCode = await generateDeliveryCode();
