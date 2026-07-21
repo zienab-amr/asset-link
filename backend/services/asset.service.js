@@ -1,6 +1,7 @@
 const assetModel = require("../models/asset.model");
 const companyModel = require("../models/company.model");
 const assetCategoryModel = require("../models/assetCategory.model");
+const bookingModel = require("../models/booking.model");
 
 const generateCode = async () => {
   const lastAsset = await assetModel.findOne().sort({ createdAt: -1 });
@@ -57,84 +58,133 @@ const addAsset = async (assetData) => {
   });
 
   await newAsset.save();
-}
+};
 
 const getAssets = async () => {
   const assets = await assetModel.find()
     .populate("companyId")
     .populate("assetCategoryId");
-    
+
   return assets;
 };
 
-
 const searchAssets = async (query) => {
+  let filter = {};
 
-    let filter = {};
-
-    if (query.name) {
-        filter.assetName = {
-            $regex: query.name,
-            $options: "i"
-        };
-    }
-  if (query.assetCode) {
-
-    filter.assetCode = {
-        $regex: query.assetCode,
-        $options: "i"
+  if (query.name) {
+    filter.assetName = {
+      $regex: query.name,
+      $options: "i",
     };
-
   }
+
+  if (query.assetCode) {
+    filter.assetCode = {
+      $regex: query.assetCode,
+      $options: "i",
+    };
+  }
+
   if (query.category) {
     filter.assetCategoryId = query.category;
-}
-if (query.location) {
-    filter.location = { $regex: query.location, $options: "i" };
-}
+  }
 
-if (query.status) {
+  if (query.location) {
+    filter.location = {
+      $regex: query.location,
+      $options: "i",
+    };
+  }
+
+  if (query.status) {
     filter.status = query.status;
-}
-if (query.priceType && (query.minPrice || query.maxPrice)) {
+  }
 
+  if (query.priceType && (query.minPrice || query.maxPrice)) {
     const price = `price.${query.priceType}`;
 
     filter[price] = {};
 
     if (query.minPrice) {
-        filter[price].$gte = Number(query.minPrice);
+      filter[price].$gte = Number(query.minPrice);
     }
 
     if (query.maxPrice) {
-        filter[price].$lte = Number(query.maxPrice);
+      filter[price].$lte = Number(query.maxPrice);
     }
-}
-    const assets = await assetModel.find(filter).populate("companyId",).populate("assetCategoryId");
+  }
 
-    return assets;
+  const assets = await assetModel.find(filter)
+    .populate("companyId")
+    .populate("assetCategoryId");
+
+  return assets;
 };
 
 const getAssetDetails = async (id) => {
   const asset = await assetModel.findById(id)
     .populate("companyId")
     .populate("assetCategoryId");
-    
+
   if (!asset) throw new Error("Asset not found");
-  
+
   return asset;
 };
 
 const updateAsset = async (id, updateData) => {
   const updatedAsset = await assetModel.findByIdAndUpdate(
-    id, 
-    updateData, 
+    id,
+    updateData,
     { new: true, runValidators: true }
   );
 
   if (!updatedAsset) throw new Error("Asset not found");
-  
+
   return updatedAsset;
+};
+
+const getAssetAvailability = async (assetId, startDate, endDate) => {
+  const asset = await assetModel.findById(assetId);
+
+  if (!asset) {
+    throw new Error("Asset not found");
+  }
+
+  if (!startDate || !endDate) {
+    throw new Error("startDate and endDate are required");
+  }
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (start >= end) {
+    throw new Error("Start date must be before end date");
+  }
+
+  const existingBooking = await bookingModel.findOne({
+    assetId: assetId,
+    status: {
+      $in: ["Pending", "Confirmed"],
+    },
+    startDate: {
+      $lt: end,
+    },
+    endDate: {
+      $gt: start,
+    },
+  });
+
+  if (existingBooking) {
+    return {
+      available: false,
+      message: "Asset is not available for the selected dates",
+    };
+  }
+
+  return {
+    available: true,
+    message: "Asset is available",
+  };
 };
 
 module.exports = {
@@ -143,4 +193,5 @@ module.exports = {
   updateAsset,
   getAssets,
   searchAssets,
+  getAssetAvailability,
 };
