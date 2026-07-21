@@ -4,17 +4,17 @@ const finalInspectionSchema = new mongoose.Schema(
   {
     booking: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Booking",
+      ref: "booking", // fixed: was "Booking" (capital)
       required: true,
     },
     beforeInspection: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Inspection", //sprint 5 person 2 task
+      ref: "inspection",
       required: true,
     },
     inspector: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "inspector", // fixed: was "User"
       required: true,
     },
     afterPhotos: [
@@ -54,4 +54,4 @@ const finalInspectionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("FinalInspection", finalInspectionSchema);
+module.exports = mongoose.model("finalInspection", finalInspectionSchema); // fixed: was "FinalInspection"

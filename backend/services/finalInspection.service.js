@@ -38,8 +38,10 @@ const createFinalInspection = async (data) => {
       description: notes,
     });
   } else {
+    // fixed: "ready_to_close" wasn't a valid enum value in booking.model.js
+    // booking.model.js enum: ["Pending", "InNegotiation", "Confirmed", "Rejected", "Cancelled", "Completed"]
     await Booking.findByIdAndUpdate(booking, {
-      status: "ready_to_close",
+      status: "Completed",
     });
   }
 
@@ -63,7 +65,7 @@ const getDamageLevel = (conditionScore) => {
 const getFinalInspectionByBooking = async (bookingId) => {
   return await FinalInspection.findOne({ booking: bookingId })
     .populate("beforeInspection")
-    .populate("inspector", "name email");
+    .populate("inspector", "fullName inspectorEmail");
 };
 
 const getAllFinalInspections = async () => {

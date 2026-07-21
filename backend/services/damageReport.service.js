@@ -13,8 +13,12 @@ const createDamageReport = async (data) => {
     status: "pending",
   });
 
+  // fixed: "pending_damage_resolution" wasn't a valid enum value in booking.model.js
+  // booking.model.js enum: ["Pending", "InNegotiation", "Confirmed", "Rejected", "Cancelled", "Completed"]
+  // keeping booking status as "Confirmed" until damage is resolved
+  // (Person 4: Penalty/Maintenance flow will update it further once resolved)
   await Booking.findByIdAndUpdate(booking, {
-    status: "pending_damage_resolution",
+    status: "Confirmed",
   });
 
   return damageReport;

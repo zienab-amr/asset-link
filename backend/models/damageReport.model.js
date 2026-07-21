@@ -4,12 +4,12 @@ const damageReportSchema = new mongoose.Schema(
   {
     finalInspection: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "FinalInspection",
+      ref: "finalInspection", // fixed: was "FinalInspection"
       required: true,
     },
     booking: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Booking",
+      ref: "booking", // fixed: was "Booking"
       required: true,
     },
     damageLevel: {
@@ -33,4 +33,4 @@ const damageReportSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("DamageReport", damageReportSchema);
+module.exports = mongoose.model("damageReport", damageReportSchema); // fixed: was "DamageReport"
