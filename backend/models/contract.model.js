@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 // <<<<<<< HEAD
+// <<<<<<< HEAD
 // // ============================================================
 // // TEMPORARY STUB - DO NOT COMMIT - by Eman
 // // This is a minimal local contract model so the escrow service
@@ -28,6 +29,7 @@ const contractSchema = new mongoose.Schema(
 
 module.exports = mongoose.model("contract", contractSchema);
 // =======
+
 const contractSchema = new mongoose.Schema(
   {
     contractCode: {
@@ -108,4 +110,6 @@ const contractSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("contract", contractSchema);
+// <<<<<<< HEAD
 // >>>>>>> main
+
