@@ -11,30 +11,20 @@ const assetCategoryRouter = require("./routes/assetCategory.route");
 const companyRoutes = require("./routes/company.routes");
 const waitingListRoutes = require("./routes/waitingList.route");
 const bookingRoutes = require("./routes/booking.routes");
-// <<<<<<< HEAD
-const negotiationRoutes = require('./controllers/negotiation.controller');
+const negotiationRoutes = require("./routes/negotiation.routes");
 const finalInspection = require("./routes/finalInspection.routes");
-const damageReport= require("./routes/damageReport.routes");
-// =======
-const negotiationRoutes = require('./controllers/negotiation.controller')
+const damageReport = require("./routes/damageReport.routes");
 const contractRoutes = require("./routes/contract.routes");
 const escrowRoutes = require("./routes/escrow.routes"); // Added by Eman
 const rentalCompletionRoutes = require("./routes/rentalCompletion.routes");
 const companyDashboardRoutes = require("./routes/companyDashboard.routes");
 const revenueReportRoutes = require("./routes/revenueReport.routes");
-<<<<<<< HEAD
-const disputeRoutes = require("./routes/dispute.routes");
-const paymentRoutes = require("./routes/payment.routes");
-
-// >>>>>>> main
-=======
 const penaltyRoutes = require("./routes/penalty.routes");
 const disputeRoutes = require("./routes/dispute.routes");
 const paymentRoutes = require("./routes/payment.routes");
 const inspectorRoutes = require("./routes/inspector.routes");
 const assetHealthRoutes = require("./routes/assetHealth.routes");
 
->>>>>>> main
 const app = express();
 
 app.use(cors());
@@ -46,29 +36,19 @@ app.use("/api/assetCategory", assetCategoryRouter);
 app.use("/api/company", companyRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/waiting-list", waitingListRoutes);
-app.use("/api/negotiation", negotiationRoutes)
-<<<<<<< HEAD
-// <<<<<<< HEAD
+app.use("/api/negotiation", negotiationRoutes);
 app.use("/api/final-inspection", finalInspection);
 app.use("/api/damage-report", damageReport);
-// =======
-=======
->>>>>>> main
 app.use("/api/contracts", contractRoutes);
 app.use("/api/escrow", escrowRoutes); // Added by Eman
 app.use("/api/rental-completion", rentalCompletionRoutes);
 app.use("/api/company-dashboard", companyDashboardRoutes);
 app.use("/api/revenue-reports", revenueReportRoutes);
-app.use("/api/disputes", disputeRoutes);
-app.use("/api/payment", paymentRoutes);
-
-
 app.use("/api/penalty", penaltyRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/inspector", inspectorRoutes);
 app.use("/api/assetHealth", assetHealthRoutes);
-
 
 const startServer = async () => {
   try {
