@@ -16,7 +16,7 @@ const assignInspector = async (data) => {
 
   if(!inspector) throw new Error("This inpector not found");
   
-  if(!inspector.isActive) throw new Error("Sorry, this inspector already is busy");
+  if(!inspector.isAvailable) throw new Error("Sorry, this inspector already is busy");
 
 
   booking.assignedInspectorId = inspectorId
