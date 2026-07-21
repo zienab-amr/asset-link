@@ -21,6 +21,8 @@ const penaltyRoutes = require("./routes/penalty.routes");
 const disputeRoutes = require("./routes/dispute.routes");
 const paymentRoutes = require("./routes/payment.routes");
 const assetLifecycle = require("./routes/assetLifecycle.routes")
+const inspectorRoutes = require("./routes/inspector.routes");
+const assetHealthRoutes = require("./routes/assetHealth.routes");
 
 const app = express();
 
@@ -43,7 +45,8 @@ app.use("/api/penalty", penaltyRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/asset-lifecycle", assetLifecycle); //added by Eman - Sprint 6
-
+app.use("/api/inspector", inspectorRoutes);
+app.use("/api/assetHealth", assetHealthRoutes);
 
 const startServer = async () => {
   try {
