@@ -215,6 +215,7 @@ const releaseMoney = async (bookingId) => {
   return await updateEscrowStatus(escrow._id, "Released");
 };
 
+
 // DEDUCT PENALTY from security deposit (Added for Penalty & Maintenance module)
 const deductPenaltyFromDeposit = async (bookingId, penaltyAmount) => {
   if (!mongoose.isValidObjectId(bookingId)) throw makeError("Invalid bookingId", 400);
@@ -247,5 +248,7 @@ module.exports = {
   updateEscrowStatus,
   freezeMoney,
   releaseMoney,
+
   deductPenaltyFromDeposit,
+
 };
