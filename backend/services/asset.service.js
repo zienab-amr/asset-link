@@ -67,7 +67,6 @@ const getAssets = async () => {
   return assets;
 };
 
-
 const searchAssets = async (query) => {
 
     let filter = {};
@@ -139,8 +138,8 @@ const updateAsset = async (id, updateData) => {
 
 module.exports = {
   addAsset,
+  getAssets,
   getAssetDetails,
   updateAsset,
-  getAssets,
   searchAssets,
 };
