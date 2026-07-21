@@ -20,6 +20,7 @@ const revenueReportRoutes = require("./routes/revenueReport.routes");
 const penaltyRoutes = require("./routes/penalty.routes");
 const disputeRoutes = require("./routes/dispute.routes");
 const paymentRoutes = require("./routes/payment.routes");
+const inspectorRoutes = require("./routes/inspector.routes")
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/revenue-reports", revenueReportRoutes);
 app.use("/api/penalty", penaltyRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/inspector", inspectorRoutes);
 
 
 const startServer = async () => {

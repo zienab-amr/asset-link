@@ -15,6 +15,8 @@ const bookingSchema = new mongoose.Schema({
 
   ownerCompanyId: { type: mongoose.Schema.Types.ObjectId, ref: "company", required: true },
 
+  assignedInspectorId:{type: mongoose.Schema.Types.ObjectId, ref: "inspector"},
+
   startDate: {
     type: Date,
     required: [true, "Start date is required"]
