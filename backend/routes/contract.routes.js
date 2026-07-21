@@ -4,12 +4,14 @@ const router = express.Router();
 const authMiddleware = require("../middleware/auth.middleware");
 
 const {
+  createContract,
   getContracts,
   getContract,
   approveContract,
   rejectContract,
 } = require("../controllers/contract.controller");
 
+router.post("/", createContract);
 router.get("/", getContracts);
 router.get("/:id", getContract);
 

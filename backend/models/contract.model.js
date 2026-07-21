@@ -48,9 +48,14 @@ const contractSchema = new mongoose.Schema(
       required: true,
     },
 
+    securityDeposit: {
+      type: Number,
+      required: true,
+    },
+
     status: {
       type: String,
-      enum: ["Draft", "Active", "Rejected"],
+      enum: ["Draft", "Active", "Rejected", "Completed"],
       default: "Draft",
     },
 
