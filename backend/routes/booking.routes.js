@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const authMiddleware = require("../middleware/auth.middleware"); // Added by Eman
+
+const authMiddleware = require("../middleware/auth.middleware");
 
 const {
   createBooking,
@@ -16,9 +17,9 @@ const {
 router.get("/company", authMiddleware, getCompanyBookings);
 router.get("/my", authMiddleware, getMyBookings);
 
-router.post("/", createBooking);
-router.get("/:id", getBooking);
-router.patch("/:id/status", updateStatus);
+router.post("/", authMiddleware, createBooking);
+router.get("/:id", authMiddleware, getBooking);
+router.patch("/:id/status", authMiddleware, updateStatus);
 
 // cancel route - by Eman
 router.patch("/:id/cancel", authMiddleware, cancelBooking);
