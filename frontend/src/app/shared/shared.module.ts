@@ -9,6 +9,10 @@ import { ImageGalleryComponent } from './components/image-gallery/image-gallery.
 import { ChatBubbleComponent } from './components/chat-bubble/chat-bubble.component';
 import { TimelineComponent } from './components/timeline/timeline.component';
 import { FilterPanelComponent } from './components/filter-panel/filter-panel.component';
+import { ModalComponent } from './components/modal/modal.component';
+import { PaginationComponent } from './components/pagination/pagination.component';
+import { DateRangePickerComponent } from './components/date-range-picker/date-range-picker.component';
+
 
 @NgModule({
   declarations: [
@@ -19,7 +23,10 @@ import { FilterPanelComponent } from './components/filter-panel/filter-panel.com
     
     ChatBubbleComponent,
     TimelineComponent,
-    FilterPanelComponent
+    FilterPanelComponent,
+    ModalComponent,
+    PaginationComponent,
+    DateRangePickerComponent
   ],
   imports: [
     CommonModule,
@@ -35,7 +42,8 @@ import { FilterPanelComponent } from './components/filter-panel/filter-panel.com
     
     ChatBubbleComponent,
     TimelineComponent,
-    FilterPanelComponent
+    FilterPanelComponent,
+    ModalComponent  
   ]
 })
 export class SharedModule { }
