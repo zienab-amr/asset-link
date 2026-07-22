@@ -187,6 +187,84 @@ const getAssetAvailability = async (assetId, startDate, endDate) => {
   };
 };
 
+const getRecommendedAssets = async (query) => {
+  const { location, maxPrice, priceType = "Daily", limit = 10 } = query;
+
+  const matchStage = {
+    status: { $in: ["Available", "Rented"] }
+  };
+
+  if (maxPrice) {
+    matchStage[`price.${priceType}`] = { $lte: Number(maxPrice) };
+  }
+
+  const scoreCalculation = [
+    { $cond: [{ $eq: ["$status", "Available"] }, 50, 0] } 
+  ];
+
+  if (location) {
+    scoreCalculation.push({
+      $cond: [
+        { $regexMatch: { input: "$location", regex: location, options: "i" } },
+        30, 
+        0
+      ]
+    });
+  }
+
+  const pipeline = [
+    { $match: matchStage }, 
+    
+    {
+      $addFields: {
+        recommendationScore: { $add: scoreCalculation } 
+      }
+    },
+    
+    {
+      $sort: {
+        recommendationScore: -1,
+        [`price.${priceType}`]: 1 
+      }
+    },
+    
+    { $limit: Number(limit) },
+    
+    {
+      $lookup: {
+        from: "companies", 
+        localField: "companyId",
+        foreignField: "_id",
+        as: "company"
+      }
+    },
+    { $unwind: { path: "$company", preserveNullAndEmptyArrays: true } }, 
+    
+    {
+      $lookup: {
+        from: "assetcategories",
+        localField: "assetCategoryId",
+        foreignField: "_id",
+        as: "category"
+      }
+    },
+    { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+    
+    {
+      $project: {
+        "company.password": 0, 
+        "company.__v": 0,
+        "category.__v": 0
+      }
+    }
+  ];
+
+  const recommendedAssets = await assetModel.aggregate(pipeline);
+
+  return recommendedAssets;
+};
+
+
 module.exports = {
   addAsset,
   getAssets,
@@ -194,4 +272,5 @@ module.exports = {
   updateAsset,
   searchAssets,
   getAssetAvailability,
+  getRecommendedAssets
 };
