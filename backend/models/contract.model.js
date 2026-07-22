@@ -2,26 +2,69 @@ const mongoose = require("mongoose");
 
 const contractSchema = new mongoose.Schema(
   {
+    contractCode: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     bookingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "booking",
       required: true,
     },
-
+    assetId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "asset",
+      required: true,
+    },
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "company",
+      required: true,
+    },
+    ownerCompanyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "company",
+      required: true,
+    },
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    securityDeposit: {
+      type: Number,
+      required: true,
+    },
     version: {
       type: Number,
       default: 1,
     },
-
-    pdfPath: {
-      type: String,
-      default: "",
-    },
-
     status: {
       type: String,
-      enum: ["Draft", "Approved"],
+      // تم دمج الحالات من كلا الفرعين
+      enum: ["Draft", "Approved", "Active", "Rejected", "Completed"],
       default: "Draft",
+    },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+    rejectedAt: {
+      type: Date,
+      default: null,
+    },
+    pdfPath: {
+      type: String,
+      default: null,
     },
   },
   {

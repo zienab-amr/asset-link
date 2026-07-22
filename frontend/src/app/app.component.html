@@ -1,0 +1,35 @@
+<div class="min-h-screen bg-page p-8">
+  <div class="max-w-5xl mx-auto space-y-10">
+
+    <h1 class="text-2xl font-bold text-text">{{ title }}</h1>
+
+    <!-- ===================== BUTTON COMPONENT ===================== -->
+    <section class="bg-white border border-border rounded-card p-6">
+      <h2 class="text-lg font-semibold text-text mb-4">Button Component</h2>
+      <div class="flex flex-wrap gap-3">
+        <app-button variant="primary">Save Changes</app-button>
+        <app-button variant="secondary">Discard</app-button>
+        <app-button variant="success">Accept Offer</app-button>
+        <app-button variant="danger">Reject Offer</app-button>
+        <app-button variant="primary" [disabled]="true">Disabled</app-button>
+      </div>
+    </section>
+
+    <!-- ===================== STEPPER / WIZARD COMPONENT ===================== -->
+<section class="bg-white border border-border rounded-card p-6">
+  <h2 class="text-lg font-semibold text-text mb-6">Stepper Component</h2>
+  <app-stepper [steps]="deliverySteps" [currentStep]="currentStep"></app-stepper>
+</section>
+
+    <!-- ===================== IMAGE GALLERY / UPLOAD COMPONENT ===================== -->
+    <section class="bg-white border border-border rounded-card p-6">
+      <h2 class="text-lg font-semibold text-text mb-4">Image Gallery / Upload Component</h2>
+      <app-image-gallery
+        [images]="demoImages"
+        (filesSelected)="onFilesSelected($event)"
+        (imagesChange)="onImagesChange($event)"
+      ></app-image-gallery>
+    </section>
+
+  </div>
+</div>
