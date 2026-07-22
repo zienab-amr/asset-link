@@ -2,16 +2,21 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { ButtonComponent } from './components/button/button.component';
+import { StepperComponent } from './components/stepper/stepper.component';
+import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
+
 import { ChatBubbleComponent } from './components/chat-bubble/chat-bubble.component';
 import { TimelineComponent } from './components/timeline/timeline.component';
 import { FilterPanelComponent } from './components/filter-panel/filter-panel.component';
 
-/**
- * SharedModule - الوحدة المشتركة لكافة المكونات القابلة لإعادة الاستخدام
- * تقوم بتسجيل وتصدير المكونات التفاعلية الثلاثة (ChatBubble, Timeline, FilterPanel).
- */
 @NgModule({
   declarations: [
+    
+    ButtonComponent, 
+    StepperComponent, 
+    ImageGalleryComponent,
+    
     ChatBubbleComponent,
     TimelineComponent,
     FilterPanelComponent
@@ -23,6 +28,11 @@ import { FilterPanelComponent } from './components/filter-panel/filter-panel.com
   exports: [
     CommonModule,
     FormsModule,
+    
+    ButtonComponent, 
+    StepperComponent, 
+    ImageGalleryComponent,
+    
     ChatBubbleComponent,
     TimelineComponent,
     FilterPanelComponent
