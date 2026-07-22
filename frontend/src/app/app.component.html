@@ -31,5 +31,43 @@
       ></app-image-gallery>
     </section>
 
+
+<!-- <app-modal
+  [isOpen]="true"
+  title="New Booking"
+  subtitle="Step 1 of 3 · Asset Selection"
+  size="lg"
+  icon="📤"
+>
+  <p class="text-gray-700">
+    هنا هيبقى محتوى الـ Modal.
+  </p>
+</app-modal> -->
+<section class="rounded-card border border-border bg-white p-6">
+
+  <h2 class="mb-6 text-lg font-semibold">
+    Date Range Picker
+  </h2>
+
+  <app-date-range-picker
+    startLabel="Start Date"
+    endLabel="End Date"
+    [required]="true"
+  >
+  </app-date-range-picker>
+
+</section>
+
+<app-pagination
+  [currentPage]="1"
+  [totalPages]="5"
+  [showing]="6"
+  [total]="6"
+  itemName="contracts"
+>
+</app-pagination>
+
+
+
   </div>
 </div>
