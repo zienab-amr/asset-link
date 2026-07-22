@@ -67,27 +67,6 @@ const getAssets = async () => {
   return assets;
 };
 
-// Restored by Eman: definition was missing but referenced in module.exports (merge leftover)
-const getAssetDetails = async (id) => {
-  const asset = await assetModel
-    .findById(id)
-    .populate("companyId")
-    .populate("assetCategoryId");
-  if (!asset) throw new Error("Asset not found");
-  return asset;
-};
-
-// Restored by Eman: definition was missing but referenced in module.exports (merge leftover)
-const updateAsset = async (id, updateData) => {
-  const asset = await assetModel.findByIdAndUpdate(
-    id,
-    updateData,
-    { new: true, runValidators: true }
-  );
-  if (!asset) throw new Error("Asset not found");
-  return asset;
-};
-
 const searchAssets = async (query) => {
 
     let filter = {};

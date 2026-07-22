@@ -12,12 +12,12 @@ const assetCategoryRouter = require("./routes/assetCategory.route");
 const companyRoutes = require("./routes/company.routes");
 const waitingListRoutes = require("./routes/waitingList.route");
 const bookingRoutes = require("./routes/booking.routes");
-const negotiationRoutes = require("./routes/negotiation.routes"); // أو .controller لو كان هذا المقصود في الـ commit
+const negotiationRoutes = require("./routes/negotiation.routes"); 
 const finalInspection = require("./routes/finalInspection.routes");
 const damageReport = require("./routes/damageReport.routes");
 const contractRoutes = require("./routes/contract.routes");
 const escrowRoutes = require("./routes/escrow.routes"); 
-const inspectionRoutes = require("./routes/inspection.routes"); // <-- إضافة مسار الفحص
+const inspectionRoutes = require("./routes/inspection.routes"); 
 const rentalCompletionRoutes = require("./routes/rentalCompletion.routes");
 const companyDashboardRoutes = require("./routes/companyDashboard.routes");
 const revenueReportRoutes = require("./routes/revenueReport.routes");
@@ -47,7 +47,7 @@ app.use("/api/final-inspection", finalInspection);
 app.use("/api/damage-report", damageReport);
 app.use("/api/contracts", contractRoutes);
 app.use("/api/escrow", escrowRoutes); 
-app.use("/api/inspection", inspectionRoutes); 
+app.use("/api/inspection", inspectionRoutes);
 app.use("/api/rental-completion", rentalCompletionRoutes);
 app.use("/api/company-dashboard", companyDashboardRoutes);
 app.use("/api/revenue-reports", revenueReportRoutes);
