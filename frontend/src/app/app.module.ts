@@ -31,7 +31,7 @@ import { LoginComponent } from './pages/login/login.component';
 @NgModule({
   declarations: [
     AppComponent,
-    
+     LoginComponent,
     CompanyProfileComponent,
     ProfileHeaderComponent,
     CompanyStatsComponent,
@@ -49,7 +49,7 @@ import { LoginComponent } from './pages/login/login.component';
   AppRoutingModule,
   FormsModule, 
   SharedModule ,
-  LoginComponent,
+ 
   HttpClientModule,
   LucideAngularModule.pick({
     CheckCircle2,
