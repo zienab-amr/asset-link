@@ -1,10 +1,10 @@
 <div class="min-h-screen bg-page p-8">
-  <div class="max-w-5xl mx-auto space-y-10">
+  <!-- <div class="max-w-5xl mx-auto space-y-10">
 
-    <h1 class="text-2xl font-bold text-text">{{ title }}</h1>
+    <h1 class="text-2xl font-bold text-text">{{ title }}</h1> -->
 
     <!-- ===================== BUTTON COMPONENT ===================== -->
-    <section class="bg-white border border-border rounded-card p-6">
+    <!-- <section class="bg-white border border-border rounded-card p-6">
       <h2 class="text-lg font-semibold text-text mb-4">Button Component</h2>
       <div class="flex flex-wrap gap-3">
         <app-button variant="primary">Save Changes</app-button>
@@ -13,23 +13,23 @@
         <app-button variant="danger">Reject Offer</app-button>
         <app-button variant="primary" [disabled]="true">Disabled</app-button>
       </div>
-    </section>
+    </section> -->
 
     <!-- ===================== STEPPER / WIZARD COMPONENT ===================== -->
-<section class="bg-white border border-border rounded-card p-6">
+<!-- <section class="bg-white border border-border rounded-card p-6">
   <h2 class="text-lg font-semibold text-text mb-6">Stepper Component</h2>
   <app-stepper [steps]="deliverySteps" [currentStep]="currentStep"></app-stepper>
-</section>
+</section> -->
 
     <!-- ===================== IMAGE GALLERY / UPLOAD COMPONENT ===================== -->
-    <section class="bg-white border border-border rounded-card p-6">
+    <!-- <section class="bg-white border border-border rounded-card p-6">
       <h2 class="text-lg font-semibold text-text mb-4">Image Gallery / Upload Component</h2>
       <app-image-gallery
         [images]="demoImages"
         (filesSelected)="onFilesSelected($event)"
         (imagesChange)="onImagesChange($event)"
       ></app-image-gallery>
-    </section>
+    </section> -->
 
 
 <!-- <app-modal
@@ -43,7 +43,7 @@
     هنا هيبقى محتوى الـ Modal.
   </p>
 </app-modal> -->
-<section class="rounded-card border border-border bg-white p-6">
+<!-- <section class="rounded-card border border-border bg-white p-6">
 
   <h2 class="mb-6 text-lg font-semibold">
     Date Range Picker
@@ -69,5 +69,17 @@
 
 
 
-  </div>
+  </div> -->
+
+<div class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+
+ <app-profile-header
+    [company]="company">
+</app-profile-header>
+
+  <app-company-stats></app-company-stats>
+  
+</div>
+<app-company-profile></app-company-profile> 
+
 </div>
