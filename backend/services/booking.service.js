@@ -27,11 +27,14 @@ const createBooking = async (bookingData) => {
   if (!startDate) throw new Error("startDate is required");
   if (!endDate) throw new Error("endDate is required");
   if (!priceType) throw new Error("priceType is required");
-  if (totalPrice === undefined || totalPrice === null) throw new Error("totalPrice is required");
+  if (totalPrice === undefined || totalPrice === null)
+    throw new Error("totalPrice is required");
 
   // Validation — priceType enum
   if (!VALID_PRICE_TYPES.includes(priceType)) {
-    throw new Error("Invalid priceType. Must be one of: Daily, Weekly, Monthly");
+    throw new Error(
+      "Invalid priceType. Must be one of: Daily, Weekly, Monthly"
+    );
   }
 
   // Validation — DB lookups
@@ -40,6 +43,38 @@ const createBooking = async (bookingData) => {
 
   const checkCompany = await companyModel.findById(companyId);
   if (!checkCompany) throw new Error("Company not found");
+
+  // ===========================
+  // NEW: Booking Dates Validation
+  // ===========================
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (start >= end) {
+    throw new Error("Start date must be before end date");
+  }
+
+  const existingBooking = await bookingModel.findOne({
+    assetId: assetId,
+    status: {
+      $in: ["Pending", "Confirmed"]
+    },
+    startDate: {
+      $lt: end
+    },
+    endDate: {
+      $gt: start
+    }
+  });
+
+  if (existingBooking) {
+    throw new Error("Asset is already booked for the selected dates");
+  }
+
+  // ===========================
+  // End of Person 2 Logic
+  // ===========================
 
   // Generate booking code
   const bookingCode = await generateBookingCode();
@@ -108,7 +143,9 @@ const updateBookingStatus = async (id, statusData) => {
 
   // Validation — status enum
   if (!VALID_STATUSES.includes(status)) {
-    throw new Error("Invalid status. Must be one of: Pending, Confirmed, Rejected, Cancelled, Completed");
+    throw new Error(
+      "Invalid status. Must be one of: Pending, Confirmed, Rejected, Cancelled, Completed"
+    );
   }
 
   // If Completed, block transition if an open dispute exists
@@ -125,7 +162,9 @@ const updateBookingStatus = async (id, statusData) => {
   }
 
   if (status === "Cancelled") {
-    await assetModel.findByIdAndUpdate(booking.assetId, { status: "Available" });
+    await assetModel.findByIdAndUpdate(booking.assetId, {
+      status: "Available",
+    });
   }
 
   booking.status = status;

@@ -1,35 +1,5 @@
 const mongoose = require("mongoose");
 
-// <<<<<<< HEAD
-// <<<<<<< HEAD
-// // ============================================================
-// // TEMPORARY STUB - DO NOT COMMIT - by Eman
-// // This is a minimal local contract model so the escrow service
-// // can run while Person 2 finishes the real contract model.
-// // DELETE this file once the real contract model is merged.
-// // ============================================================
-const contractSchema = new mongoose.Schema(
-  {
-    status: {
-      type: String,
-      enum: [
-        "Draft",
-        "Pending",
-        "Active",
-        "Approved",
-        "Rejected",
-        "Completed",
-        "Cancelled",
-      ],
-      default: "Draft",
-    },
-  },
-  { timestamps: true }
-);
-
-module.exports = mongoose.model("contract", contractSchema);
-// =======
-
 const contractSchema = new mongoose.Schema(
   {
     contractCode: {
@@ -38,67 +8,60 @@ const contractSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-
     bookingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "booking",
       required: true,
     },
-
     assetId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "asset",
       required: true,
     },
-
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "company",
       required: true,
     },
-
     ownerCompanyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "company",
       required: true,
     },
-
     startDate: {
       type: Date,
       required: true,
     },
-
     endDate: {
       type: Date,
       required: true,
     },
-
     totalPrice: {
       type: Number,
       required: true,
     },
-
     securityDeposit: {
       type: Number,
       required: true,
     },
-
+    version: {
+      type: Number,
+      default: 1,
+    },
     status: {
       type: String,
-      enum: ["Draft", "Active", "Rejected", "Completed"],
+      // تم دمج الحالات من كلا الفرعين
+      enum: ["Draft", "Approved", "Active", "Rejected", "Completed"],
       default: "Draft",
     },
-
     approvedAt: {
       type: Date,
       default: null,
     },
-
     rejectedAt: {
       type: Date,
       default: null,
     },
-
     pdfPath: {
       type: String,
       default: null,
@@ -106,10 +69,7 @@ const contractSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 module.exports = mongoose.model("contract", contractSchema);
-// <<<<<<< HEAD
-// >>>>>>> main
-

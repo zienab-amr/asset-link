@@ -68,5 +68,48 @@ const searchAssets = async (req,res)=>{
     return res.status(500).send(err.message);
   }
 }
+const getAssetAvailability = async (req, res) => {
+  try {
+    const result = await assetService.getAssetAvailability(
+      req.params.id,
+      req.query.startDate,
+      req.query.endDate
+    );
 
-module.exports = {addAsset, getAssetDetails, updateAsset, getAssets, searchAssets}
+    return res.status(200).json(result);
+
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: err.message
+    });
+  }
+};
+
+
+const getRecommendedAssets = async (req, res, next) => {
+  try {
+    const recommended = await assetService.getRecommendedAssets(req.query);
+    
+    return res.status(200).json({
+      success: true,
+      count: recommended.length,
+      data: recommended,
+    });
+  } catch (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message
+      });
+  }
+};
+
+module.exports = {
+  addAsset,
+  getAssetDetails,
+  updateAsset,
+  getAssets,
+  searchAssets,
+  getAssetAvailability,
+  getRecommendedAssets
+};
