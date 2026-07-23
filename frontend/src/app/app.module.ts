@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, CheckCircle2, Clock3 } from 'lucide-angular';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { SharedModule } from './shared/shared.module';
 import { ButtonComponent } from './shared/components/button/button.component';
 import { StepperComponent } from './shared/components/stepper/stepper.component';
 import { ImageGalleryComponent } from './shared/components/image-gallery/image-gallery.component';
@@ -28,12 +29,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 @NgModule({
   declarations: [
     AppComponent,
-    ButtonComponent,
-    StepperComponent,
-    ImageGalleryComponent,
-    ModalComponent,
-    PaginationComponent,
-    DateRangePickerComponent,
+    
     CompanyProfileComponent,
     ProfileHeaderComponent,
     CompanyStatsComponent,
@@ -49,7 +45,8 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
   imports: [
   BrowserModule,
   AppRoutingModule,
-  FormsModule,
+  FormsModule, 
+  SharedModule ,
   HttpClientModule,
   LucideAngularModule.pick({
     CheckCircle2,
@@ -65,4 +62,4 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}
