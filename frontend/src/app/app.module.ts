@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, CheckCircle2, Clock3 } from 'lucide-angular';
 import { AppRoutingModule } from './app-routing.module';
-<<<<<<< Updated upstream
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { ButtonComponent } from './shared/components/button/button.component';
