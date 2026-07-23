@@ -9,6 +9,7 @@ import { MaintenanceStatsComponent } from './components/maintenance-stats/mainte
 import { PredictiveAlertsComponent } from './components/predictive-alerts/predictive-alerts.component';
 import { MaintenanceTableComponent } from './components/maintenance-table/maintenance-table.component';
 import { RequestMaintenanceModalComponent } from './components/request-maintenance-modal/request-maintenance-modal.component';
+import { StatusBadgeComponent } from './components/status-badge/status-badge.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { RequestMaintenanceModalComponent } from './components/request-maintenan
     MaintenanceStatsComponent,
     PredictiveAlertsComponent,
     MaintenanceTableComponent,
-    RequestMaintenanceModalComponent
+    RequestMaintenanceModalComponent,
+    StatusBadgeComponent
   ],
   imports: [
     CommonModule,

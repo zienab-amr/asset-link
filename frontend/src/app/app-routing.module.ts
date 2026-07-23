@@ -3,6 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
+    path: '',
+    redirectTo: 'maintenance-schedule',
+    pathMatch: 'full'
+  },
+  {
     path: 'maintenance-schedule',
     loadChildren: () => import('./pages/maintenance-schedule/maintenance-schedule.module').then(m => m.MaintenanceScheduleModule)
   }
