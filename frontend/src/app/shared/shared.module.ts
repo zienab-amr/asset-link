@@ -10,9 +10,11 @@ import { TabsComponent } from './components/tabs/tabs.component';
 import { StatCardComponent } from './components/stat-card/stat-card.component';
 import { ScoreWidgetComponent } from './components/score-widget/score-widget.component';
 import { QrCodeWidgetComponent } from './components/qr-code-widget/qr-code-widget.component';
-import { ChatBubbleComponent } from './components/chat-bubble/chat-bubble.component';
+
+// import { ChatBubbleComponent } from './components/chat-bubble/chat-bubble.component';
 import { TimelineComponent } from './components/timeline/timeline.component';
-import { FilterPanelComponent } from './components/filter-panel/filter-panel.component';
+// import { FilterPanelComponent } from './components/filter-panel/filter-panel.component';
+
 import { ModalComponent } from './components/modal/modal.component';
 import { PaginationComponent } from './components/pagination/pagination.component';
 import { DateRangePickerComponent } from './components/date-range-picker/date-range-picker.component';
@@ -27,20 +29,20 @@ import { DateRangePickerComponent } from './components/date-range-picker/date-ra
     StatCardComponent,
     ScoreWidgetComponent,
     QrCodeWidgetComponent,
-    ChatBubbleComponent,
+
+    // ChatBubbleComponent,
     TimelineComponent,
-    FilterPanelComponent,
+    // FilterPanelComponent,
+
     ModalComponent,
     PaginationComponent,
-    DateRangePickerComponent
+    DateRangePickerComponent,
   ],
-  imports: [
-    CommonModule,
-    FormsModule
-  ],
+  imports: [CommonModule, FormsModule],
   exports: [
     CommonModule,
     FormsModule,
+
     ButtonComponent,
     StepperComponent,
     ImageGalleryComponent,
@@ -49,12 +51,14 @@ import { DateRangePickerComponent } from './components/date-range-picker/date-ra
     StatCardComponent,
     ScoreWidgetComponent,
     QrCodeWidgetComponent,
-    ChatBubbleComponent,
+
+    // ChatBubbleComponent,
     TimelineComponent,
-    FilterPanelComponent,
+    // FilterPanelComponent,
+
     ModalComponent,
     PaginationComponent,
-    DateRangePickerComponent
-  ]
+    DateRangePickerComponent,
+  ],
 })
 export class SharedModule {}
