@@ -21,6 +21,9 @@ import { CertificationsComponent } from './pages/company/company-profile/compone
 import { TeamMembersComponent } from './pages/company/company-profile/components/team-members/team-members.component';
 import { ListedAssetsComponent } from './pages/company/company-profile/components/listed-assets/listed-assets.component';
 import { ReviewsComponent } from './pages/company/company-profile/components/reviews/reviews.component';
+import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -41,18 +44,25 @@ import { ReviewsComponent } from './pages/company/company-profile/components/rev
     CertificationsComponent,
     TeamMembersComponent,
     ListedAssetsComponent,
-    ReviewsComponent
+    ReviewsComponent,
   ],
   imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-     LucideAngularModule.pick({
-      CheckCircle2,
-      Clock3
-    })
-  ],
-  providers: [],
+  BrowserModule,
+  AppRoutingModule,
+  FormsModule,
+  HttpClientModule,
+  LucideAngularModule.pick({
+    CheckCircle2,
+    Clock3
+  })
+],
+ providers: [
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: AuthInterceptor,
+    multi: true
+  }
+],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
