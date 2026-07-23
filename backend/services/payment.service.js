@@ -1,6 +1,8 @@
 const Payment = require("../models/payment.model");
 const Booking = require("../models/booking.model");
 const Contract = require("../models/contract.model"); 
+const paymentProvider = require("./paymentProvider.service");
+const escrowService = require("./escrow.service");
 
 const createPayment = async (bookingId) => {
     const booking = await Booking.findById(bookingId);
@@ -30,7 +32,35 @@ const createPayment = async (bookingId) => {
         paymentStatus: "Pending",
     });
     
+    
     return payment;
 }
 
-module.exports = { createPayment };
+const completePayment = async (bookingId) => {
+
+    const payment = await Payment.findOne({ bookingId });
+
+    if (!payment) {
+        throw new Error("Payment not found");
+    }
+
+    const contract = await Contract.findOne({ bookingId });
+
+    if (!contract) {
+        throw new Error("Contract not found");
+    }
+
+    const completedPayment = await paymentProvider.processPayment(payment._id);
+
+    const escrow = await escrowService.createEscrow({
+        bookingId,
+        contractId: contract._id
+    });
+
+    return {
+        payment: completedPayment,
+        escrow
+    };
+};
+
+module.exports = { createPayment ,completePayment };

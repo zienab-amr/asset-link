@@ -18,4 +18,24 @@ const createPayment = async (req, res) => {
     }
 };
 
-module.exports = { createPayment };
+const completePayment = async (req, res) => {
+    try {
+        const { bookingId } = req.body;
+
+        const result = await paymentService.completePayment(bookingId);
+
+        res.status(200).json({
+            success: true,
+            message: "Payment completed successfully",
+            data: result
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+module.exports = { createPayment, completePayment };
