@@ -1,31 +1,31 @@
 <app-modal
   [isOpen]="isOpen"
-  title="طلب صيانة جديدة (Request Maintenance)"
-  subtitle="جدولة خدمة دورية أو إصلاح عطل لمعدات الأسطول"
+  title="Request Maintenance"
+  subtitle="Schedule routine service or repair work for fleet equipment"
   icon="🛠️"
   [showConfirmButton]="false"
   [showCancelButton]="false"
   (closed)="closeModal()"
 >
   <!-- Modal Form -->
-  <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()" class="space-y-4" dir="rtl">
+  <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()" class="space-y-4" dir="ltr">
 
     <!-- Asset Selection -->
     <div>
       <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-        المعدة المختارة (Equipment) <span class="text-red-500">*</span>
+        Equipment <span class="text-red-500">*</span>
       </label>
       <select
         formControlName="assetId"
         class="w-full px-4 py-2.5 text-sm border rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all"
         [ngClass]="isFieldInvalid('assetId') ? 'border-red-300 bg-red-50/20' : 'border-slate-200'"
       >
-        <option value="" disabled selected>اختر معدة من الأسطول...</option>
+        <option value="" disabled selected>Select equipment from fleet...</option>
         <option *ngFor="let asset of assets" [value]="asset.assetId">
           {{ asset.assetCode }} - {{ asset.assetName }} ({{ asset.category }})
         </option>
       </select>
-      <p *ngIf="isFieldInvalid('assetId')" class="text-[11px] text-red-500 mt-1">يجب اختيار المعدة المطلوبة للصيانة.</p>
+      <p *ngIf="isFieldInvalid('assetId')" class="text-[11px] text-red-500 mt-1">Equipment selection is required.</p>
     </div>
 
     <!-- Grid 2 Columns: Maintenance Type & Scheduled Date -->
@@ -34,7 +34,7 @@
       <!-- Maintenance Type -->
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-          نوع الصيانة (Service Type) <span class="text-red-500">*</span>
+          Service Type <span class="text-red-500">*</span>
         </label>
         <select
           formControlName="maintenanceType"
@@ -47,7 +47,7 @@
       <!-- Scheduled Date -->
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-          التاريخ المطلوب (Scheduled Date) <span class="text-red-500">*</span>
+          Scheduled Date <span class="text-red-500">*</span>
         </label>
         <input
           type="date"
@@ -55,7 +55,7 @@
           class="w-full px-4 py-2.5 text-sm border rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           [ngClass]="isFieldInvalid('scheduledDate') ? 'border-red-300 bg-red-50/20' : 'border-slate-200'"
         />
-        <p *ngIf="isFieldInvalid('scheduledDate')" class="text-[11px] text-red-500 mt-1">يرجى تحديد تاريخ مجدول صحيح.</p>
+        <p *ngIf="isFieldInvalid('scheduledDate')" class="text-[11px] text-red-500 mt-1">Please select a valid scheduled date.</p>
       </div>
     </div>
 
@@ -65,32 +65,32 @@
       <!-- Technician -->
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-          الفني/المسؤول (Assigned Tech) <span class="text-red-500">*</span>
+          Assigned Technician <span class="text-red-500">*</span>
         </label>
         <select
           formControlName="technician"
           class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
           [ngClass]="isFieldInvalid('technician') ? 'border-red-300 bg-red-50/20' : 'border-slate-200'"
         >
-          <option value="" disabled selected>اختر الفني المسؤول...</option>
+          <option value="" disabled selected>Select assigned technician...</option>
           <option *ngFor="let tech of technicians" [value]="tech">{{ tech }}</option>
         </select>
-        <p *ngIf="isFieldInvalid('technician')" class="text-[11px] text-red-500 mt-1">يرجى اختيار المسؤول عن تنفيذ الصيانة.</p>
+        <p *ngIf="isFieldInvalid('technician')" class="text-[11px] text-red-500 mt-1">Please assign a technician responsible for maintenance.</p>
       </div>
 
       <!-- Priority Level -->
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-          أولوية الصيانة (Priority)
+          Priority Level
         </label>
         <select
           formControlName="priority"
           class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
         >
-          <option value="low">Low - منخفضة</option>
-          <option value="medium">Medium - متوسطة (اعتيادي)</option>
-          <option value="high">High - عالية</option>
-          <option value="urgent">Urgent - طارئة فورية</option>
+          <option value="low">Low Priority</option>
+          <option value="medium">Medium Priority (Standard)</option>
+          <option value="high">High Priority</option>
+          <option value="urgent">Urgent / Emergency</option>
         </select>
       </div>
     </div>
@@ -98,16 +98,16 @@
     <!-- Notes & Scope of Work -->
     <div>
       <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-        تفاصيل وملاحظات الصيانة (Notes & Scope) <span class="text-red-500">*</span>
+        Notes & Scope of Work <span class="text-red-500">*</span>
       </label>
       <textarea
         formControlName="notes"
         rows="3"
-        placeholder="اكتب ملاحظات الفحص أو قائمة القطع المطلوب تغييرها (على الأقل 10 أحرف)..."
+        placeholder="Enter inspection notes or required replacement parts (at least 10 characters)..."
         class="w-full px-4 py-3 text-sm border rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         [ngClass]="isFieldInvalid('notes') ? 'border-red-300 bg-red-50/20' : 'border-slate-200'"
       ></textarea>
-      <p *ngIf="isFieldInvalid('notes')" class="text-[11px] text-red-500 mt-1">الملاحظات مطلوبة ويجب ألا تقل عن 10 أحرف.</p>
+      <p *ngIf="isFieldInvalid('notes')" class="text-[11px] text-red-500 mt-1">Notes are required and must be at least 10 characters.</p>
     </div>
 
     <!-- Modal Footer Action Buttons -->
@@ -117,7 +117,7 @@
         (click)="closeModal()"
         class="px-5 py-2.5 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
       >
-        إلغاء (Cancel)
+        Cancel
       </button>
       
       <button
@@ -126,7 +126,7 @@
         class="px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 shadow-md shadow-blue-600/30 flex items-center gap-2 transition-all disabled:opacity-50"
       >
         <span *ngIf="isSubmitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-        <span>تأكيد وجدولة الصيانة</span>
+        <span>Confirm & Schedule Maintenance</span>
       </button>
     </div>
 

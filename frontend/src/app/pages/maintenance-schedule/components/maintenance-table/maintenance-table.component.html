@@ -10,7 +10,7 @@
         type="text"
         [(ngModel)]="searchQuery"
         (input)="onSearchInput()"
-        placeholder="ابحث باسم المعدة، الكود، الفني، أو نوع الصيانة..."
+        placeholder="Search by equipment, code, tech, or service type..."
         class="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-slate-400"
       />
     </div>
@@ -48,16 +48,16 @@
 
   <!-- TABLE VIEW MODE -->
   <div *ngIf="viewMode === 'table'" class="overflow-x-auto">
-    <table class="w-full text-right" dir="rtl">
+    <table class="w-full text-left" dir="ltr">
       <thead>
         <tr class="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-          <th class="px-5 py-3.5 text-right">كود المرفق / المعدة (Equipment)</th>
-          <th class="px-5 py-3.5 text-right">نوع الصيانة (Service Type)</th>
-          <th class="px-5 py-3.5 text-right">التاريخ (Date)</th>
-          <th class="px-5 py-3.5 text-right">الفني/المسؤول (Technician)</th>
-          <th class="px-5 py-3.5 text-right">ساعات التشغيل (Hrs)</th>
-          <th class="px-5 py-3.5 text-right">الحالة (Status)</th>
-          <th class="px-5 py-3.5 text-center">التفاصيل (Actions)</th>
+          <th class="px-5 py-3.5 text-left">EQUIPMENT</th>
+          <th class="px-5 py-3.5 text-left">SERVICE TYPE</th>
+          <th class="px-5 py-3.5 text-left">DATE</th>
+          <th class="px-5 py-3.5 text-left">TECHNICIAN</th>
+          <th class="px-5 py-3.5 text-left">OPERATING HOURS</th>
+          <th class="px-5 py-3.5 text-left">STATUS</th>
+          <th class="px-5 py-3.5 text-center">ACTIONS</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
@@ -110,7 +110,7 @@
             <!-- Actions -->
             <td class="px-5 py-4 text-center">
               <button class="text-xs text-blue-600 font-bold hover:underline">
-                {{ expandedRowId === record.id ? 'إخفاء ▲' : 'التفاصيل ▼' }}
+                {{ expandedRowId === record.id ? 'Hide ▲' : 'Details ▼' }}
               </button>
             </td>
           </tr>
@@ -120,9 +120,9 @@
             <td colspan="7" class="px-6 py-4">
               <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-inner space-y-2">
                 <div class="flex items-center justify-between text-xs">
-                  <span class="font-bold text-slate-800">وصف وأعمال الصيانة المنجزة:</span>
+                  <span class="font-bold text-slate-800">Service Description & Completed Work:</span>
                   <span *ngIf="record.cost" class="font-mono text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md">
-                    التكلفة المقدرة: ${{ record.cost | number }}
+                    Estimated Cost: ${{ record.cost | number }}
                   </span>
                 </div>
                 <p class="text-xs text-slate-600 leading-relaxed">{{ record.desc }}</p>
@@ -138,8 +138,8 @@
               <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">
                 🔍
               </div>
-              <p class="text-sm font-bold text-slate-800">لا توجد سجلات صيانة متطابقة</p>
-              <p class="text-xs text-slate-400">لم نتمكن من العثور على أي سجلات صيانة تطابق محددات البحث الحالية.</p>
+              <p class="text-sm font-bold text-slate-800">No matching maintenance records found</p>
+              <p class="text-xs text-slate-400">No maintenance records match your current search filters.</p>
             </div>
           </td>
         </tr>
@@ -173,8 +173,8 @@
 
           <p class="text-xs text-slate-600 leading-relaxed">{{ record.desc }}</p>
           <div class="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[11px] text-slate-500">
-            <span>ساعات التشغيل: <strong class="font-mono text-slate-800">{{ record.hrs | number }} hrs</strong></span>
-            <span *ngIf="record.cost">التكلفة: <strong class="font-mono text-emerald-700">${{ record.cost | number }}</strong></span>
+            <span>Operating Hours: <strong class="font-mono text-slate-800">{{ record.hrs | number }} hrs</strong></span>
+            <span *ngIf="record.cost">Cost: <strong class="font-mono text-emerald-700">${{ record.cost | number }}</strong></span>
           </div>
         </div>
       </div>
