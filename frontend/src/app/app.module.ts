@@ -25,11 +25,13 @@ import { ReviewsComponent } from './pages/company/company-profile/components/rev
 import { HttpClientModule } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { LoginComponent } from './pages/login/login.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    
+     LoginComponent,
     CompanyProfileComponent,
     ProfileHeaderComponent,
     CompanyStatsComponent,
@@ -47,6 +49,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
   AppRoutingModule,
   FormsModule, 
   SharedModule ,
+ 
   HttpClientModule,
   LucideAngularModule.pick({
     CheckCircle2,

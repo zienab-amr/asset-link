@@ -16,6 +16,8 @@ import { FilterPanelComponent } from './components/filter-panel/filter-panel.com
 import { ModalComponent } from './components/modal/modal.component';
 import { PaginationComponent } from './components/pagination/pagination.component';
 import { DateRangePickerComponent } from './components/date-range-picker/date-range-picker.component';
+import { RouterModule } from '@angular/router'; // needed for routerLink inside AuthLayout/Login
+import { AuthLayoutComponent } from './components/auth-layout/auth-layout.component';
 
 @NgModule({
   declarations: [
@@ -32,11 +34,13 @@ import { DateRangePickerComponent } from './components/date-range-picker/date-ra
     FilterPanelComponent,
     ModalComponent,
     PaginationComponent,
-    DateRangePickerComponent
+    DateRangePickerComponent,
+    AuthLayoutComponent,
   ],
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+     RouterModule,
   ],
   exports: [
     CommonModule,
@@ -54,7 +58,8 @@ import { DateRangePickerComponent } from './components/date-range-picker/date-ra
     FilterPanelComponent,
     ModalComponent,
     PaginationComponent,
-    DateRangePickerComponent
-  ]
+    DateRangePickerComponent,
+    AuthLayoutComponent,
+  ],
 })
 export class SharedModule {}
