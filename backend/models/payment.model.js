@@ -19,6 +19,27 @@ const paymentSchema = new mongoose.Schema({
         required: true
     },
 
+    // -------- Paymob tracking fields --------
+    merchantOrderId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+
+    paymobOrderId: {
+        type: String,
+        index: true
+    },
+
+    paymentKey: {
+        type: String
+    },
+
+    transactionId: {
+        type: String
+    },
+    // -----------------------------------------
+
     paymentMethod: {
         type: String,
         enum: ["Paymob", "Cash"],

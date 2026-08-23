@@ -3,6 +3,19 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface BillingData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  street: string;
+  building: string;
+  floor: string;
+  apartment: string;
+  city: string;
+  country: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,14 +34,13 @@ export class PaymentsEscrowService {
     return this.http.get<any>(`${this.apiUrl}/dashboard`);
   }
 
-  createPayment(bookingId: string): Observable<any> {
+  createPayment(bookingId: string, billingData: BillingData): Observable<any> {
     const headers = new HttpHeaders({ 'x-idempotency-key': this.generateIdempotencyKey() });
-    return this.http.post<any>(`${this.apiUrl}/create`, { bookingId }, { headers });
+    return this.http.post<any>(`${this.apiUrl}/create`, { bookingId, billingData }, { headers });
   }
 
-  completePayment(bookingId: string): Observable<any> {
-    const headers = new HttpHeaders({ 'x-idempotency-key': this.generateIdempotencyKey() });
-    return this.http.post<any>(`${this.apiUrl}/pay`, { bookingId }, { headers });
+  getPaymentStatus(paymentId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${paymentId}/status`);
   }
 
 }

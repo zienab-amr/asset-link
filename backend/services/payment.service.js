@@ -1,11 +1,11 @@
 const Payment = require("../models/payment.model");
 const Booking = require("../models/booking.model");
-const Contract = require("../models/contract.model"); 
+const Contract = require("../models/contract.model");
 const paymentProvider = require("./paymentProvider.service");
 const escrowService = require("./escrow.service");
 const Escrow = require("../models/escrow.model");
 
-const createPayment = async (bookingId) => {
+const createPayment = async (bookingId, billingData) => {
     const booking = await Booking.findById(bookingId);
     if (!booking) {
         throw new Error("Booking not found");
@@ -14,7 +14,7 @@ const createPayment = async (bookingId) => {
         throw new Error("Booking is not confirmed");
     }
     const existingPayment = await Payment.findOne({ bookingId });
-    
+
     if (existingPayment) {
         throw new Error("Booking already paid");
     }
@@ -26,33 +26,61 @@ const createPayment = async (bookingId) => {
 
     const totalToPay = contractData.totalPrice + contractData.securityDeposit;
 
+    const merchantOrderId = `${bookingId}-${Date.now()}`;
+
+    const { paymobOrderId, paymentKey, iframeUrl } = await paymentProvider.initiatePaymobPayment({
+        amount: totalToPay,
+        merchantOrderId,
+        billingData,
+    });
+
     const payment = await Payment.create({
         bookingId: booking._id,
         companyId: booking.companyId,
         amount: totalToPay,
+        merchantOrderId,
+        paymobOrderId,
+        paymentKey,
         paymentStatus: "Pending",
     });
-    
-    return payment;
-}
 
-const completePayment = async (bookingId) => {
-    const payment = await Payment.findOne({ bookingId });
+    return { payment, iframeUrl };
+};
 
+const completePaymentFromWebhook = async (transactionObj) => {
+    const paymobOrderId = String(
+        transactionObj.order?.id ?? transactionObj["order.id"]
+    );
+    const success = transactionObj.success === true || transactionObj.success === "true";
+
+    const payment = await Payment.findOne({ paymobOrderId });
     if (!payment) {
-        throw new Error("Payment not found");
+        console.warn(`Webhook: no payment found for paymobOrderId ${paymobOrderId}`);
+        return null;
     }
 
-    const contract = await Contract.findOne({ bookingId });
+    if (payment.paymentStatus === "Completed") {
+        return { payment };
+    }
 
+    if (!success) {
+        payment.paymentStatus = "Failed";
+        await payment.save();
+        return { payment };
+    }
+
+    payment.paymentStatus = "Completed";
+    payment.paidAt = new Date();
+    payment.transactionId = String(transactionObj.id);
+    await payment.save();
+
+    const contract = await Contract.findOne({ bookingId: payment.bookingId });
     if (!contract) {
         throw new Error("Contract not found");
     }
 
-    const completedPayment = await paymentProvider.processPayment(payment._id);
-
     const escrow = await escrowService.createEscrow({
-        bookingId,
+        bookingId: payment.bookingId,
         contractId: contract._id
     });
 
@@ -60,22 +88,22 @@ const completePayment = async (bookingId) => {
     contract.approvedAt = new Date();
     await contract.save();
 
-    return {
-        payment: completedPayment,
-        escrow
-    };
+    return { payment, escrow };
+};
+
+const getPaymentStatus = async (paymentId) => {
+    const payment = await Payment.findById(paymentId);
+    if (!payment) {
+        throw new Error("Payment not found");
+    }
+    return payment.paymentStatus;
 };
 
 const getDashboard = async (companyId) => {
 
-    // ===========================
-    // Summary Cards
-    // ===========================
- console.log("companyId =", companyId);
-    const payments = await Payment.find({companyId});
-    console.log("payments =", payments);
-    const escrows = await Escrow.find({$or: [{ companyId },{ ownerCompanyId: companyId }]});
-    console.log("escrows =", escrows);
+    const payments = await Payment.find({ companyId });
+    const escrows = await Escrow.find({ $or: [{ companyId }, { ownerCompanyId: companyId }] });
+
     const totalProcessed = payments
         .filter(p => p.paymentStatus === "Completed")
         .reduce((sum, p) => sum + p.amount, 0);
@@ -95,14 +123,9 @@ const getDashboard = async (companyId) => {
         )
         .reduce((sum, e) => sum + e.totalHeld, 0);
 
-    // Platform Fee = 5%
     const platformFee = releasedMTD * 0.05;
 
-    // ===========================
-    // Ledger
-    // ===========================
-
-    const ledger = await Escrow.find({$or: [{ companyId: companyId },{ ownerCompanyId: companyId }]})
+    const ledger = await Escrow.find({ $or: [{ companyId: companyId }, { ownerCompanyId: companyId }] })
         .populate("companyId", "companyName")
         .populate("ownerCompanyId", "companyName")
         .populate("bookingId")
@@ -138,10 +161,6 @@ const getDashboard = async (companyId) => {
 
         status: item.status
     }));
-
-    // ===========================
-    // Timeline
-    // ===========================
 
     const timeline = ledger.map(item => {
         let title = "";
@@ -205,4 +224,4 @@ const getDashboard = async (companyId) => {
     };
 };
 
-module.exports = { createPayment, completePayment, getDashboard };
+module.exports = { createPayment, completePaymentFromWebhook, getPaymentStatus, getDashboard };

@@ -137,7 +137,7 @@
       <p *ngIf="selectedContract.status === 'Active' && isOwner(selectedContract)" class="text-xs text-amber-600 bg-amber-50 p-2 rounded mb-3">
         ⏳ Waiting for renter to pay...
       </p>
-      
+
       <!-- Payment Button for Renter -->
       <div *ngIf="selectedContract.status === 'Active' && isRenter(selectedContract)" class="mb-3">
         <p class="text-xs text-amber-600 bg-amber-50 p-2 rounded mb-2">
@@ -206,7 +206,7 @@
   <div *ngIf="showDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
       <h3 class="text-xl font-bold text-text mb-4">Create Delivery</h3>
-      
+
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-text-muted mb-1">Pickup Location</label>
@@ -240,4 +240,5 @@
       </div>
     </div>
   </div>
+
 </div>
