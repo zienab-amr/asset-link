@@ -1,14 +1,26 @@
 const paymentService = require("../services/payment.service");
+const paymentProvider = require("../services/paymentProvider.service");
 
 const createPayment = async (req, res) => {
     try {
-        const { bookingId } = req.body;
-        const payment = await paymentService.createPayment(bookingId);
-        
+        const { bookingId, billingData } = req.body;
+
+        if (!billingData) {
+            return res.status(400).json({
+                success: false,
+                message: "billingData is required (first_name, last_name, email, phone_number)"
+            });
+        }
+
+        const { payment, iframeUrl } = await paymentService.createPayment(bookingId, billingData);
+
         res.status(201).json({
             success: true,
-            message: "Payment created successfully",
-            data: payment
+            message: "Payment initiated successfully",
+            data: {
+                paymentId: payment._id,
+                iframeUrl
+            }
         });
     } catch (err) {
         res.status(400).json({
@@ -18,30 +30,42 @@ const createPayment = async (req, res) => {
     }
 };
 
-const completePayment = async (req, res) => {
+const handleWebhook = async (req, res) => {
     try {
-        const { bookingId } = req.body;
-        const result = await paymentService.completePayment(bookingId);
+        const transactionObj = req.body.obj || req.body;
+        const receivedHmac = req.query.hmac;
 
-        res.status(200).json({
-            success: true,
-            message: "Payment completed successfully",
-            data: result
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
+        const isValid = paymentProvider.verifyHmac(transactionObj, receivedHmac);
+
+        if (!isValid) {
+            console.error("Invalid Paymob HMAC signature - possible spoofed webhook");
+            return res.status(401).json({ success: false, message: "Invalid signature" });
+        }
+
+        await paymentService.completePaymentFromWebhook(transactionObj);
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.log("========== WEBHOOK ERROR ==========");
+        console.log(err);
+        console.log(err.stack);
+
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+const getPaymentStatus = async (req, res) => {
+    try {
+        const paymentStatus = await paymentService.getPaymentStatus(req.params.paymentId);
+        res.status(200).json({ success: true, data: { paymentStatus } });
+    } catch (err) {
+        res.status(404).json({ success: false, message: err.message });
     }
 };
 
 const getDashboard = async (req, res) => {
     try {
-        console.log(req.user);
         const dashboard = await paymentService.getDashboard(req.user.id);
-
-        console.log("Dashboard Result:", dashboard);
 
         res.status(200).json({
             success: true,
@@ -60,8 +84,9 @@ const getDashboard = async (req, res) => {
     }
 };
 
-module.exports = { 
-    createPayment, 
-    completePayment, 
-    getDashboard 
+module.exports = {
+    createPayment,
+    handleWebhook,
+    getPaymentStatus,
+    getDashboard
 };
