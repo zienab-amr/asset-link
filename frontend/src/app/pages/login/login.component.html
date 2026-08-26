@@ -11,13 +11,13 @@
 
     <form (ngSubmit)="onSubmit()" class="space-y-4">
       <div>
-        <label class="text-xs font-semibold text-slate-500 tracking-wide">WORK EMAIL *</label>
+        <label class="text-xs font-semibold text-slate-500 tracking-wide">EMAIL ADDRESS *</label>
         <input
           type="email"
-          [(ngModel)]="companyEmail"
-          name="companyEmail"
+          [(ngModel)]="email"
+          name="email"
           required
-          placeholder="marcus.chen@terraequip.com"
+          placeholder="Enter your email"
           class="w-full mt-1 px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30"
         />
       </div>
