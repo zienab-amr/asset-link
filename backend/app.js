@@ -62,7 +62,7 @@ app.use("/api/penalty", penaltyRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/asset-lifecycle", assetLifecycle); 
-app.use("/api/inspector", inspectorRoutes);
+app.use("/api/inspectors", inspectorRoutes);
 app.use("/api/assetHealth", assetHealthRoutes);
 app.use("/api/deliveries", deliveryRoutes);
 app.use("/api/maintenances", maintenanceRoutes);
