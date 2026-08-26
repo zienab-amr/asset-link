@@ -1,0 +1,139 @@
+<div class="p-8 bg-slate-50 min-h-screen font-['Inter']">
+  <!-- Header -->
+  <div class="mb-8 flex justify-between items-start">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">My Inspectors</h1>
+      <p class="text-slate-500 text-sm mt-1">
+        Manage your inspection team and their availability.
+      </p>
+    </div>
+    <button
+      (click)="openModal()"
+      class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-blue-700 transition-all">
+      <span>+</span> Add Inspector
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center py-10">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && inspectors.length === 0" class="text-center py-16 bg-white rounded-2xl border border-slate-200">
+    <div class="text-4xl mb-3">🕵️‍♂️</div>
+    <h3 class="text-lg font-bold text-slate-800">No Inspectors Yet</h3>
+    <p class="text-sm text-slate-500 mt-1">You haven't added any inspectors to your company team.</p>
+  </div>
+
+  <!-- Inspectors Grid -->
+  <div *ngIf="!isLoading && inspectors.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let insp of inspectors" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-4">
+        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-lg font-bold">
+          {{ insp.fullName.charAt(0).toUpperCase() }}
+        </div>
+        <!-- Status Badge based on Schema -->
+        <span 
+          class="px-2.5 py-1 text-[10px] font-bold rounded-full border"
+          [ngClass]="insp.isAvailable ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'">
+          {{ insp.isAvailable ? 'AVAILABLE' : 'BUSY' }}
+        </span>
+      </div>
+      
+      <h3 class="text-lg font-bold text-slate-900 truncate">{{ insp.fullName }}</h3>
+      
+      <div class="mt-4 space-y-2">
+        <div class="flex items-center gap-2 text-sm text-slate-500">
+          <span class="text-slate-400">📧</span>
+          <span class="truncate">{{ insp.inspectorEmail }}</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-slate-500">
+          <span class="text-slate-400">📱</span>
+          <span>{{ insp.phoneNumber }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Inspector Modal -->
+  <div *ngIf="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <h3 class="text-lg font-bold text-slate-900">Add New Inspector</h3>
+        <button (click)="closeModal()" class="text-slate-400 hover:text-red-500 transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <form (ngSubmit)="onSubmit()" class="p-6 space-y-4">
+        <div>
+          <label class="text-xs font-bold text-slate-500 tracking-wide uppercase">Full Name *</label>
+          <input
+            type="text"
+            [(ngModel)]="newInspector.fullName"
+            name="fullName"
+            required
+            placeholder="John Doe"
+            class="w-full mt-1.5 px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 tracking-wide uppercase">Email Address *</label>
+          <input
+            type="email"
+            [(ngModel)]="newInspector.inspectorEmail"
+            name="inspectorEmail"
+            required
+            placeholder="inspector@company.com"
+            class="w-full mt-1.5 px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 tracking-wide uppercase">Phone Number *</label>
+          <input
+            type="text"
+            [(ngModel)]="newInspector.phoneNumber"
+            name="phoneNumber"
+            required
+            placeholder="+201xxxxxxxxx"
+            class="w-full mt-1.5 px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 tracking-wide uppercase">Password *</label>
+          <input
+            type="password"
+            [(ngModel)]="newInspector.password"
+            name="password"
+            required
+            placeholder="••••••••"
+            class="w-full mt-1.5 px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          />
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="pt-4 flex gap-3">
+          <button 
+            type="button" 
+            (click)="closeModal()" 
+            class="flex-1 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            [disabled]="isSubmitting"
+            class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50">
+            {{ isSubmitting ? 'Saving...' : 'Add Inspector' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
