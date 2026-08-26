@@ -124,24 +124,30 @@ export class InspectionService {
     this.errorSubject.next(null);
 
     const filters = this.filterSubject.value;
-
     let params = new HttpParams();
 
-    if (
-      filters.statusFilter &&
-      filters.statusFilter !== 'all'
-    ) {
+    if (filters.statusFilter && filters.statusFilter !== 'all') {
       params = params.set('status', filters.statusFilter);
     }
+    if (filters.typeFilter && filters.typeFilter !== 'all') {
+      params = params.set('inspectionType', filters.typeFilter);
+    }
 
-    if (
-      filters.typeFilter &&
-      filters.typeFilter !== 'all'
-    ) {
-      params = params.set(
-        'inspectionType',
-        filters.typeFilter
-      );
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+
+    if (user && user.role === 'Inspector') {
+      this.http.get<any>(environment.apiUrl + '/api/inspectors/tasks').subscribe({
+        next: (res) => {
+          this.inspectionsSubject.next(res.data || res || []);
+          this.loadingSubject.next(false);
+        },
+        error: (err) => {
+          this.inspectionsSubject.next([]);
+          this.loadingSubject.next(false);
+        }
+      });
+      return; 
     }
 
     this.http.get<any>(this.baseUrl, { params }).subscribe({
@@ -150,9 +156,7 @@ export class InspectionService {
         this.loadingSubject.next(false);
       },
       error: (err) => {
-        this.errorSubject.next(
-          err.error?.message || 'Failed to load inspections'
-        );
+        this.errorSubject.next(err.error?.message || 'Failed to load inspections');
         this.loadingSubject.next(false);
       },
     });
