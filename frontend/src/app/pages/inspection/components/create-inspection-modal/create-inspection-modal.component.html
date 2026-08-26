@@ -1,8 +1,8 @@
 <app-modal
   [isOpen]="isOpen"
-  title="Create Inspection Report"
-  subtitle="Perform equipment inspection"
-  icon="🔍"
+  title="{{ editData ? 'Fill Inspection Report' : 'Create Inspection Report' }}"
+  subtitle="{{ editData ? 'Update pending task details' : 'Perform equipment inspection' }}"
+  icon="clipboard-check" 
   [showConfirmButton]="false"
   [showCancelButton]="false"
   (closed)="closeModal()"
@@ -22,7 +22,7 @@
 
       <select
         formControlName="inspectionType"
-        class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white"
+        class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white disabled:bg-slate-100 disabled:text-slate-500"
       >
         <option
           *ngFor="let item of inspectionTypes"
@@ -42,7 +42,7 @@
       <select
         formControlName="bookingId"
         (change)="onBookingChange()"
-        class="w-full px-4 py-2.5 text-sm border rounded-xl"
+        class="w-full px-4 py-2.5 text-sm border rounded-xl disabled:bg-slate-100 disabled:text-slate-500"
       >
         <option value="">Select Booking</option>
 
@@ -66,7 +66,7 @@
 
       <select
         formControlName="assetId"
-        class="w-full px-4 py-2.5 text-sm border rounded-xl"
+        class="w-full px-4 py-2.5 text-sm border rounded-xl disabled:bg-slate-100 disabled:text-slate-500"
       >
         <option value="">Select Asset</option>
 
@@ -90,7 +90,7 @@
         <input
           type="text"
           formControlName="inspectorName"
-          class="w-full px-4 py-2 border rounded-xl"
+          class="w-full px-4 py-2 border rounded-xl disabled:bg-slate-100"
         />
       </div>
 
@@ -104,11 +104,11 @@
           min="0"
           max="100"
           formControlName="conditionScore"
-          class="w-full"
+          class="w-full accent-blue-600"
         />
 
         <div class="text-center font-bold mt-1">
-          {{ inspectionForm.get('conditionScore')?.value }}
+          {{ inspectionForm.get('conditionScore')?.value }} / 100
         </div>
       </div>
 
@@ -151,7 +151,12 @@
 
       <select
         formControlName="status"
-        class="w-full px-4 py-2 border rounded-xl"
+        class="w-full px-4 py-2 border rounded-xl font-bold"
+        [ngClass]="{
+          'text-emerald-600': inspectionForm.get('status')?.value === 'Passed',
+          'text-red-600': inspectionForm.get('status')?.value === 'Failed',
+          'text-amber-500': inspectionForm.get('status')?.value === 'Pending'
+        }"
       >
         <option
           *ngFor="let s of statuses"
@@ -217,24 +222,21 @@
 
     <!-- Photos -->
     <div>
-
-      <label class="block text-xs font-bold mb-1">
-        Photos
+      <label class="block text-xs font-bold mb-2">
+        Inspection Photos
       </label>
-
-      <input
-        type="text"
-        formControlName="photos"
-        class="w-full px-4 py-2 border rounded-xl"
-        placeholder="url1,url2,url3"
-      />
-
+      
+      <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+        <app-image-gallery
+          [images]="inspectionPhotos"
+          [maxImages]="8"
+          (imagesChange)="onPhotosUploaded($event)"
+        ></app-image-gallery>
+      </div>
     </div>
 
     <!-- Checklist -->
-
     <div>
-
       <label class="block text-xs font-bold mb-2">
         Checklist
       </label>
@@ -243,16 +245,14 @@
 
         <label
           *ngFor="let item of ['brakes','engine','body','tires','lights']"
-          class="flex items-center gap-2"
+          class="flex items-center gap-2 bg-slate-50 border px-3 py-1.5 rounded-lg cursor-pointer hover:bg-slate-100"
         >
 
           <input
             type="checkbox"
             [formControlName]="item"
           >
-
-          {{ item }}
-
+          <span class="capitalize text-sm font-medium">{{ item }}</span>
         </label>
 
       </div>
@@ -260,9 +260,7 @@
     </div>
 
     <!-- Notes -->
-
     <div>
-
       <label class="block text-xs font-bold mb-1">
         Notes
       </label>
@@ -271,30 +269,30 @@
         rows="3"
         formControlName="notes"
         class="w-full px-4 py-2 border rounded-xl"
+        placeholder="Add any additional remarks here..."
       ></textarea>
 
     </div>
 
     <!-- Buttons -->
-
     <div class="flex justify-end gap-3 pt-4">
 
       <button
         type="button"
         (click)="closeModal()"
-        class="px-5 py-2 border rounded-xl"
+        class="px-5 py-2 border rounded-xl hover:bg-slate-50 transition-colors font-semibold text-slate-600"
       >
         Cancel
       </button>
 
       <button
-  type="button"
-  (click)="onSubmit()"
-  [disabled]="isSubmitting"
-  class="px-6 py-2 bg-blue-600 text-white rounded-xl"
->
-  Submit Inspection
-</button>
+        type="button"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting"
+        class="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl disabled:opacity-50 hover:bg-blue-700 transition-colors"
+      >
+        {{ editData ? 'Save Report' : 'Submit Inspection' }}
+      </button>
 
     </div>
 
