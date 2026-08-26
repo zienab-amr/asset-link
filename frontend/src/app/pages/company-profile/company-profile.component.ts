@@ -24,7 +24,6 @@ assets: any[] = [];
     role: '',
     isVerified: false,
 
-    // بيانات مؤقتة لحد ما الـ API يوفرها
     description:
       '',
 

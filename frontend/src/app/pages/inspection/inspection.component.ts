@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InspectionService } from './services/inspection.service';
+import { InspectorService } from '../../services/inspector.service';
 import {
   InspectionRecord,
   InspectionStatus,
   CreateInspectionPayload,
 } from './models/inspection.model';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-inspection',
@@ -13,6 +15,8 @@ import {
   styleUrls: ['./inspection.component.css'],
 })
 export class InspectionComponent implements OnInit {
+  userRole: string = '';
+  selectedInspection: any = null;
   filteredInspections$: Observable<InspectionRecord[]>;
   
   loading$: Observable<boolean>;
@@ -32,18 +36,9 @@ export class InspectionComponent implements OnInit {
 private calculateStats(inspections: InspectionRecord[]): void {
   this.inspectionStats = {
     total: inspections.length,
-
-    pending: inspections.filter(
-      (i) => i.status === 'Pending'
-    ).length,
-
-    passed: inspections.filter(
-      (i) => i.status === 'Passed'
-    ).length,
-
-    failed: inspections.filter(
-      (i) => i.status === 'Failed'
-    ).length,
+    pending: inspections.filter((i) => i.status?.toLowerCase() === 'pending').length,
+    passed: inspections.filter((i) => i.status?.toLowerCase() === 'passed').length,
+    failed: inspections.filter((i) => i.status?.toLowerCase() === 'failed').length,
   };
 }
 
@@ -89,7 +84,11 @@ private calculateStats(inspections: InspectionRecord[]): void {
     { from: '#BE185D', to: '#E11D48', accent: '#FDA4AF' },
   ];
 
-  constructor(private inspectionService: InspectionService) {
+  constructor(
+    private inspectionService: InspectionService,
+    private authService: AuthService,
+    private inspectorService: InspectorService
+  ) {
     this.filteredInspections$ = this.inspectionService.filteredInspections$;
    
     this.loading$ = this.inspectionService.loading$;
@@ -97,6 +96,9 @@ private calculateStats(inspections: InspectionRecord[]): void {
   }
 
   ngOnInit(): void {
+    const currentUser = this.authService.getCompany();
+    this.userRole = currentUser?.role || 'Company';
+
   this.inspectionService.loadInspections();
   this.loadDropdownData();
 
@@ -111,7 +113,17 @@ private calculateStats(inspections: InspectionRecord[]): void {
 
   private loadDropdownData(): void {
     this.inspectionService.getAssets().subscribe((data) => (this.assets = data));
-    this.inspectionService.getBookings().subscribe((data) => (this.bookings = data));
+
+    if (this.userRole === 'Inspector') {
+      this.inspectorService.getMyTasks().subscribe({
+        next: (res: any) => {
+          this.bookings = res.data || [];
+        },
+        error: (err: any) => console.error('Failed to load inspector tasks', err)
+      });
+    } else {
+      this.inspectionService.getBookings().subscribe((data) => (this.bookings = data));
+    }
   }
 
   onSearch(query: string): void {
@@ -129,6 +141,7 @@ private calculateStats(inspections: InspectionRecord[]): void {
 
   closeCreateModal(): void {
     this.isCreateModalOpen = false;
+    this.selectedInspection = null; 
   }
 
   handleNewInspection(payload: CreateInspectionPayload): void {
@@ -208,6 +221,22 @@ private calculateStats(inspections: InspectionRecord[]): void {
       },
       error: (err) => {
         this.deleteError = typeof err === 'string' ? err : 'Failed to delete inspection';
+      },
+    });
+  }
+
+  openEditModal(insp: any): void {
+    this.selectedInspection = insp;
+    this.isCreateModalOpen = true;
+  }
+
+  handleUpdateInspection(event: { id: string; payload: Partial<CreateInspectionPayload> }): void {
+    this.inspectionService.updateInspection(event.id, event.payload).subscribe({
+      next: () => {
+        this.closeCreateModal();
+      },
+      error: (err) => {
+        console.error('Failed to update inspection:', err);
       },
     });
   }

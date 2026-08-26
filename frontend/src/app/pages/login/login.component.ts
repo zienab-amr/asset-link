@@ -7,7 +7,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
-  companyEmail = '';
+  email = ''; 
   password = '';
   rememberMe = true;
   showPassword = false;
@@ -25,16 +25,35 @@ export class LoginComponent {
     this.errorMessage = '';
     this.isLoading = true;
 
-    this.authService.login(this.companyEmail, this.password).subscribe({
+    this.authService.login(this.email, this.password).subscribe({
       next: (res: any) => {
-        this.isLoading = false;
-        this.authService.saveSession(res.token, res.company);
-       this.router.navigate(['/app/dashboard']); // TODO: adjust to your real dashboard route
+        this.handleSuccessfulLogin(res, 'Company');
       },
       error: (err) => {
-        this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
-      },
+        this.authService.inspectorLogin(this.email, this.password).subscribe({
+          next: (inspRes: any) => {
+            this.handleSuccessfulLogin(inspRes, 'Inspector');
+          },
+          error: (inspErr: any) => {
+            this.isLoading = false;
+            this.errorMessage = 'Invalid email or password.'; 
+          }
+        });
+      }
     });
+  }
+
+  private handleSuccessfulLogin(res: any, roleType: 'Company' | 'Inspector') {
+    this.isLoading = false;
+    
+    const userData = roleType === 'Company' ? res.company : res.inspector;
+    
+    this.authService.saveSession(res.token, userData);
+    
+    if (userData.role === 'Inspector') {
+      this.router.navigate(['/app/inspections']); 
+    } else {
+      this.router.navigate(['/app/dashboard']);
+    }
   }
 }

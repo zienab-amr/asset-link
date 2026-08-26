@@ -12,6 +12,10 @@ const createInspection = async (data) => {
     throw new Error("Booking not found");
   }
 
+  if (booking.assignedInspectorId.toString() !== data.inspectorId) {
+   throw new Error("Unauthorized: You are not assigned to inspect this booking");
+}
+
   // Prevent duplicate inspection of the same type
   const existingInspection = await Inspection.findOne({
     bookingId: data.bookingId,
@@ -41,35 +45,31 @@ const createInspection = async (data) => {
   // BEFORE RENTAL INSPECTION
   // ==========================================
   if (inspection.inspectionType === "before_use") {
-
     if (inspection.status === "Passed") {
-
       booking.status = "Confirmed";
       booking.cancelReason = "";
-
       await booking.save();
       
-await Asset.findByIdAndUpdate(
-    inspection.assetId,
-    {
-        status: "Booked",
+      await Asset.findByIdAndUpdate(inspection.assetId, {
+        status: "In Rental", // رجعتها In Rental لأن الفحص نجح والمعدة هتشتغل
         healthScore: inspection.conditionScore,
-    }
-);
+      });
 
-    } else {
-
+    } else if (inspection.status === "Failed") {
       booking.status = "Cancelled";
       booking.cancelReason = "Inspection failed";
-
       await booking.save();
 
       await Asset.findByIdAndUpdate(inspection.assetId, {
         status: "Available",
       });
 
-    }
+      const Escrow = require("../models/escrow.model");
+      await Escrow.findOneAndUpdate({ bookingId: data.bookingId }, { status: "Refunded" });
 
+      const Inspector = require("../models/inspector.model");
+      await Inspector.findByIdAndUpdate(booking.assignedInspectorId, { isAvailable: true });
+    }
   }
 
   // ==========================================

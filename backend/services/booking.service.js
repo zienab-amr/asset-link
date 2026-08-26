@@ -4,6 +4,8 @@ const assetModel = require("../models/asset.model");
 const companyModel = require("../models/company.model");
 const disputeModel = require("../models/dispute.model");
 const generateBookingCode = require("../utils/generateBookingCode");
+const Escrow = require("../models/escrow.model");
+const Inspector = require("../models/inspector.model");
 
 const VALID_PRICE_TYPES = ["Daily", "Weekly", "Monthly"];
 const VALID_STATUSES = ["Pending", "Confirmed", "Rejected", "Cancelled", "Completed"];
@@ -95,17 +97,6 @@ const createBooking = async (bookingData) => {
     });
 
     await newBooking.save();
-
-    // Update asset status to Booked
-    const updatedAsset = await assetModel.findByIdAndUpdate(
-      assetId,
-      { status: "Booked" },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedAsset) {
-      throw new Error("Failed to update asset status");
-    }
     
     return newBooking;
   } catch (err) {
@@ -138,14 +129,12 @@ const updateBookingStatus = async (id, statusData) => {
   const booking = await bookingModel.findById(id);
   if (!booking) throw new Error("Booking not found");
 
-  // Validation — status enum
   if (!VALID_STATUSES.includes(status)) {
     throw new Error(
       "Invalid status. Must be one of: Pending, Confirmed, Rejected, Cancelled, Completed"
     );
   }
 
-  // If Completed, block transition if an open dispute exists
   if (status === "Completed") {
     const openDispute = await disputeModel.findOne({ bookingId: id, status: "Open" });
     if (openDispute) {
@@ -153,12 +142,15 @@ const updateBookingStatus = async (id, statusData) => {
     }
   }
 
-  // If Cancelled, cancelReason is required
   if (status === "Cancelled" && !cancelReason) {
     throw new Error("cancelReason is required when status is Cancelled");
   }
 
-  if (status === "Cancelled") {
+  if (status === "Confirmed") {
+    await assetModel.findByIdAndUpdate(booking.assetId, {
+      status: "Booked",
+    });
+  } else if (status === "Cancelled") {
     await assetModel.findByIdAndUpdate(booking.assetId, {
       status: "Available",
     });
@@ -242,9 +234,7 @@ const cancelBooking = async (id, cancelReason, userId) => {
     e.statusCode = 400;
     throw e;
   }
-
-  // Remove transaction for local environments without replica sets
-  // NOW RE-ADDED: We are using transactions as requested for data integrity
+  
   const session = await mongoose.startSession();
   try {
     await session.withTransaction(async () => {
@@ -252,12 +242,27 @@ const cancelBooking = async (id, cancelReason, userId) => {
       booking.cancelReason = cancelReason.trim();
       await booking.save({ session });
 
-      // return the asset to Available after cancellation - by Eman
       await assetModel.findByIdAndUpdate(
         booking.assetId,
         { status: "Available" },
         { new: true, session }
       );
+
+      const Escrow = require("../models/escrow.model");
+      await Escrow.findOneAndUpdate(
+        { bookingId: id },
+        { status: "Refunded" },
+        { session }
+      );
+
+      if (booking.assignedInspectorId) {
+        const Inspector = require("../models/inspector.model");
+        await Inspector.findByIdAndUpdate(
+          booking.assignedInspectorId,
+          { isAvailable: true },
+          { session }
+        );
+      }
     });
 
     return booking;

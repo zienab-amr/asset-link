@@ -194,4 +194,51 @@ export class BookingsComponent implements OnInit {
       date.getDate() === today.getDate()
     );
   }
+
+  isAssignModalOpen = false;
+  selectedBookingForAssignment: string | null = null;
+
+  goToAssignInspector(bookingId: string) {
+    this.closeModal(); 
+    this.selectedBookingForAssignment = bookingId;
+    this.isAssignModalOpen = true;
+  }
+
+  closeAssignModal() {
+    this.isAssignModalOpen = false;
+    this.selectedBookingForAssignment = null;
+  }
+
+  onInspectorAssigned() {
+    this.closeAssignModal();
+    this.loadBookings(); 
+  }
+
+  isOwner(booking: any): boolean {
+    const loggedInCompany = this.authService.getCompany();
+    const companyId = String(loggedInCompany?.id || loggedInCompany?._id);
+    const bookingOwnerId = String(booking.ownerCompanyId?._id || booking.ownerCompanyId);
+    return bookingOwnerId === companyId;
+  }
+
+  canCancel(booking: any): boolean {
+    return ['Pending', 'Confirmed'].includes(booking.status);
+  }
+
+  cancelBooking(bookingId: string) {
+    if(confirm('Are you sure you want to cancel this booking? The escrow money will be refunded.')) {
+      const reason = prompt('Please enter a cancellation reason:');
+      if(!reason) return;
+      
+      this.bookingService.cancelBooking(bookingId, reason).subscribe({
+        next: () => {
+          this.closeModal();
+          this.loadBookings(); 
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || err.error?.error || 'Failed to cancel booking';
+        }
+      });
+    }
+  }
 }

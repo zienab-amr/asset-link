@@ -98,6 +98,7 @@
       <lucide-icon name="clipboard-check" [size]="13"></lucide-icon> All Reports
     </button>
     <button
+      *ngIf="userRole === 'Inspector'" 
       (click)="openCreateModal()"
       class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all">
       <lucide-icon name="plus" [size]="13"></lucide-icon> New Inspection
@@ -207,6 +208,13 @@
   <lucide-icon name="clipboard-check" [size]="13"></lucide-icon>
   View Report
 </button>
+<button
+  *ngIf="userRole === 'Inspector' && insp.status === 'Pending'"
+  (click)="openEditModal(insp)"
+  class="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white rounded-xl shadow-sm bg-amber-500 hover:bg-amber-600 mr-2"
+>
+  <lucide-icon name="pen-tool" [size]="13"></lucide-icon> Fill Report
+</button>
                 <!-- <button
                   (click)="toggleExpand(insp._id)"
                   class="text-[10px] font-semibold text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-1">
@@ -305,3 +313,12 @@
   </app-modal>
 
 </div>
+<app-create-inspection-modal
+  [isOpen]="isCreateModalOpen"
+  [assets]="assets"
+  [bookings]="bookings"
+  [editData]="selectedInspection" 
+  (close)="closeCreateModal()"
+  (submitInspection)="handleNewInspection($event)"
+  (updateInspection)="handleUpdateInspection($event)"
+></app-create-inspection-modal>

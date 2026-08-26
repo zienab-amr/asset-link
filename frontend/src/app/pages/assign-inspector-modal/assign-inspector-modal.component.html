@@ -1,0 +1,65 @@
+<div *ngIf="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+    
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+      <h3 class="text-lg font-bold text-slate-900">Assign Inspector</h3>
+      <button (click)="closeModal()" class="text-slate-400 hover:text-red-500 transition-colors">
+        <lucide-icon name="x" [size]="20"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      <p class="text-sm text-slate-500 mb-4">
+        Select an available inspector from your team to perform the physical inspection for this booking.
+      </p>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="flex justify-center py-6">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+      </div>
+
+      <!-- No Inspectors Available -->
+      <div *ngIf="!isLoading && availableInspectors.length === 0" class="text-center py-6 bg-slate-50 rounded-xl border border-slate-100 mb-4">
+        <lucide-icon name="alert-circle" [size]="24" class="text-amber-500 mx-auto mb-2"></lucide-icon>
+        <p class="text-sm font-semibold text-slate-700">No inspectors available</p>
+        <p class="text-xs text-slate-500 mt-1">All your inspectors are currently busy or you haven't added any yet.</p>
+      </div>
+
+      <!-- Select Inspector -->
+      <form *ngIf="!isLoading && availableInspectors.length > 0" (ngSubmit)="onSubmit()" class="space-y-5">
+        <div>
+          <label class="text-xs font-bold text-slate-500 tracking-wide uppercase">Select Inspector *</label>
+          <select 
+            [(ngModel)]="selectedInspectorId" 
+            name="inspectorId" 
+            required
+            class="w-full mt-1.5 px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 bg-white">
+            <option value="" disabled selected>-- Choose an inspector --</option>
+            <option *ngFor="let insp of availableInspectors" [value]="insp._id">
+              {{ insp.fullName }} ({{ insp.inspectorEmail }})
+            </option>
+          </select>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-2 flex gap-3">
+          <button 
+            type="button" 
+            (click)="closeModal()" 
+            class="flex-1 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            [disabled]="isSubmitting || !selectedInspectorId"
+            class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50">
+            {{ isSubmitting ? 'Assigning...' : 'Confirm Assignment' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
