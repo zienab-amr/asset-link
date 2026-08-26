@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const inspectorSchema = new mongoose.Schema({
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'company',
+    required: true
+  },
   fullName: {
     type: String,
     required: [true, "Name is required"],
