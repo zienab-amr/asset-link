@@ -20,6 +20,7 @@ import { AddAssetComponent } from './pages/add-asset/add-asset.component';
 import { OrdersComponent } from './pages/orders/orders.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { InspectorsComponent } from './pages/inspectors/inspectors.component';
 
 const routes: Routes = [
 
@@ -85,6 +86,11 @@ const routes: Routes = [
   path: 'orders',
   component: OrdersComponent
 },
+
+        {
+        path: 'inspectors',
+        component: InspectorsComponent
+      },
       {
         path: 'contracts',
         component: ContractsComponent

@@ -4,36 +4,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import {
-  LucideAngularModule,
-  CheckCircle2,
-  Clock3,
-  Mail,
-  Phone,
-  Globe,
-  MapPin,
-  LayoutDashboard,
-  CalendarDays,
-  FileText,
-  MessageSquare,
-  Truck,
-  CreditCard,
-  Building2,
-  KeyRound,
-  LogOut,
-  Shield,
-  Image,
-  BriefcaseBusiness,
-  Users,
-  Calendar,
-  Inbox,
-  ArrowRight,
-  ArrowLeft,
-  AlertCircle,
-  Lock,
-  Check,
-  X
-} from 'lucide-angular';
+
+// 👇 شلنا استيرادات lucide-angular من هنا لأن SharedModule متكفل بيها
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -74,6 +46,8 @@ import { OrdersComponent } from './pages/orders/orders.component';
 import { AcceptOfferModalComponent } from './pages/orders/components/accept-offer-modal/accept-offer-modal.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { InspectorsComponent } from './pages/inspectors/inspectors.component';
+import { AssignInspectorModalComponent } from './pages/assign-inspector-modal/assign-inspector-modal.component';
 
 @NgModule({
   declarations: [
@@ -103,14 +77,16 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password.co
     ShipmentDetailsComponent,
     DeliveryEventLogComponent,
     CompanyProfileComponent,
-    NewBookingModalComponent,
+    // NewBookingModalComponent,
     DashboardLayoutComponent,
     EditCompanyProfileComponent,
     SmartMatchesComponent,
     OrdersComponent,
     AcceptOfferModalComponent,
     ForgotPasswordComponent,
-    ResetPasswordComponent
+    ResetPasswordComponent,
+    InspectorsComponent,
+    AssignInspectorModalComponent
   ],
   imports: [
     BrowserModule,
@@ -119,37 +95,9 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password.co
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    SharedModule,
-    HttpClientModule,
-    LucideAngularModule.pick({
-      CheckCircle2,
-      Clock3,
-      Mail,
-      Phone,
-      Globe,
-      MapPin,
-      LayoutDashboard,
-      CalendarDays,
-      FileText,
-      MessageSquare,
-      Truck,
-      CreditCard,
-      Building2,
-      KeyRound,
-      LogOut,
-      Shield,
-      Image,
-      BriefcaseBusiness,
-      Users,
-      Calendar,
-      Inbox,
-      ArrowRight,
-      ArrowLeft,
-      AlertCircle,
-      Lock,
-      Check,
-      X
-    })
+    SharedModule, // 👈 الـ SharedModule ده متكفل يجيب كل الزراير والأيقونات للموديول ده
+    HttpClientModule
+    // 👇 شلنا الـ LucideAngularModule.pick من هنا عشان ميعملش Conflict
   ],
   providers: [
     {
