@@ -2,6 +2,8 @@ const Inspection = require("../models/inspection.model");
 const Booking = require("../models/booking.model");
 const Asset = require("../models/asset.model");
 const Company = require("../models/company.model");
+const Inspector = require("../models/inspector.model");
+
 
 const ACTIVE_BOOKING_STATUSES = ["Pending", "Confirmed", "InNegotiation"];
 
@@ -51,9 +53,11 @@ const createInspection = async (data) => {
       await booking.save();
       
       await Asset.findByIdAndUpdate(inspection.assetId, {
-        status: "In Rental", // رجعتها In Rental لأن الفحص نجح والمعدة هتشتغل
+        status: "In Rental", 
         healthScore: inspection.conditionScore,
       });
+
+      await Inspector.findByIdAndUpdate(booking.assignedInspectorId, { isAvailable: true });
 
     } else if (inspection.status === "Failed") {
       booking.status = "Cancelled";
@@ -67,7 +71,6 @@ const createInspection = async (data) => {
       const Escrow = require("../models/escrow.model");
       await Escrow.findOneAndUpdate({ bookingId: data.bookingId }, { status: "Refunded" });
 
-      const Inspector = require("../models/inspector.model");
       await Inspector.findByIdAndUpdate(booking.assignedInspectorId, { isAvailable: true });
     }
   }
@@ -76,91 +79,65 @@ const createInspection = async (data) => {
   // AFTER RENTAL INSPECTION
   // ==========================================
   else {
-
     booking.status = "Completed";
     await booking.save();
 
     if (inspection.hasDamage) {
-
       await Asset.findByIdAndUpdate(inspection.assetId, {
         status: "Maintenance",
       });
-
     } else {
-
       await Asset.findByIdAndUpdate(inspection.assetId, {
         status: "Available",
       });
-
     }
 
-  }
+    await Inspector.findByIdAndUpdate(booking.assignedInspectorId, { isAvailable: true });
+  } 
 
-  return inspection;
+  return inspection; 
 };
-const getAllInspections = async (filters = {}, user) => {
 
+const getAllInspections = async (filters = {}, user) => {
   const query = {};
 
-  if (filters.status) {
-    query.status = filters.status;
-  }
-
-  if (filters.assetId) {
-    query.assetId = filters.assetId;
-  }
-
-  if (filters.bookingId) {
-    query.bookingId = filters.bookingId;
-  }
-
-  if (filters.inspectionType) {
-    query.inspectionType = filters.inspectionType;
-  }
-
-  // ===============================
-  // Filter inspections by company
-  // ===============================
+  if (filters.status) query.status = filters.status;
+  if (filters.assetId) query.assetId = filters.assetId;
+  if (filters.bookingId) query.bookingId = filters.bookingId;
+  if (filters.inspectionType) query.inspectionType = filters.inspectionType;
 
   if (user) {
+    if (user.role === "Inspector" || user.inspectorEmail) {
+      const bookings = await Booking.find({ assignedInspectorId: user.id }, "_id");
+      query.bookingId = { $in: bookings.map((b) => b._id) };
+    } 
+    else {
+      const company = await Company.findById(user.id);
+      if (!company) {
+        throw new Error("Company not found");
+      }
 
-    const company = await Company.findById(user.id);
+      let bookingQuery = {};
+      switch (company.companyType) {
+        case "Owner":
+          bookingQuery.ownerCompanyId = company._id;
+          break;
+        case "Renter":
+          bookingQuery.companyId = company._id;
+          break;
+        case "Both":
+          bookingQuery.$or = [
+            { ownerCompanyId: company._id },
+            { companyId: company._id },
+          ];
+          break;
+        default:
+          bookingQuery.companyId = company._id;
+      }
 
-    if (!company) {
-      throw new Error("Company not found");
+      const bookings = await Booking.find(bookingQuery, "_id");
+      query.bookingId = { $in: bookings.map((b) => b._id) };
     }
-
-    let bookingQuery = {};
-
-    switch (company.companyType) {
-
-      case "Owner":
-        bookingQuery.ownerCompanyId = company._id;
-        break;
-
-      case "Renter":
-        bookingQuery.companyId = company._id;
-        break;
-
-      case "Both":
-        bookingQuery.$or = [
-          { ownerCompanyId: company._id },
-          { companyId: company._id },
-        ];
-        break;
-
-      default:
-        bookingQuery.companyId = company._id;
-    }
-
-    const bookings = await Booking.find(
-      bookingQuery,
-      "_id"
-    );
-
-    query.bookingId = {
-      $in: bookings.map((b) => b._id),
-    };
   }
 
   const inspections = await Inspection.find(query)
