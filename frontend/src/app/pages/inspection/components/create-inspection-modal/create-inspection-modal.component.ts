@@ -12,11 +12,10 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
   @Input() isOpen = false;
   @Input() assets: any[] = [];
   @Input() bookings: any[] = [];
-  @Input() editData: any = null; // 🚀 ده اللي هيستقبل المسودة المبعوتة من الباك إند
+  @Input() editData: any = null; 
 
   @Output() close = new EventEmitter<void>();
-  @Output() submitInspection = new EventEmitter<CreateInspectionPayload>();
-  @Output() updateInspection = new EventEmitter<{ id: string; payload: Partial<CreateInspectionPayload> }>(); // 🚀 إيفينت جديد للتحديث
+  @Output() submitInspection = new EventEmitter<any>(); 
 
   inspectionForm!: FormGroup;
   isSubmitting = false;
@@ -40,13 +39,17 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
     this.initForm();
   }
 
-  // 🚀 دي بتراقب لو بعتنا مسودة للمودال عشان يفتحها يملأ البيانات فوراً
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['editData'] && this.isOpen && this.inspectionForm) {
       if (this.editData) {
         this.patchFormWithEditData();
       } else {
-        this.inspectionForm.enable(); // لو مفيش مسودة، نفتح كل الحقول للإنشاء
+        this.inspectionForm.enable(); 
+        
+        const currentUser = this.authService.getCompany();
+        if (currentUser?.role === 'Inspector') {
+          this.inspectionForm.get('inspectorName')?.disable();
+        }
       }
     }
   }
@@ -69,7 +72,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
         80,
         [Validators.required, Validators.min(0), Validators.max(100)],
       ],
-      status: ['Pending', Validators.required],
+      status: ['Passed', Validators.required], 
       hasDamage: [false],
       damageLevel: ['none'],
       damageCost: [0],
@@ -85,7 +88,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
     this.inspectionForm
       .get('inspectionType')
       ?.valueChanges.subscribe(() => {
-        if (!this.editData) { // نعمل الريسيت بس لو بننشئ واحد جديد مش بنعدل
+        if (!this.editData) { 
           this.onInspectionTypeChange();
         }
       });
@@ -94,39 +97,37 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
       this.inspectionForm.get('inspectorName')?.disable();
     }
 
-    // لو المودال فتح بمسودة جاهزة
     if (this.editData) {
       this.patchFormWithEditData();
     }
   }
 
-  // 🚀 دي الدالة السحرية اللي بتعبي الفورم وتقفل الحقول الثابتة للمسودة
   private patchFormWithEditData(): void {
     if (!this.inspectionForm) return;
 
     this.inspectionForm.patchValue({
-      bookingId: this.editData.bookingId?._id || this.editData.bookingId || '',
+      bookingId: this.editData._id || '', // 🚀 الـ ID بتاع المسودة هو الـ ID بتاع الحجز
       assetId: this.editData.assetId?._id || this.editData.assetId || '',
-      inspectorName: this.editData.inspectorName || '',
-      taxRegister: this.editData.taxRegister || '',
-      commercialRegister: this.editData.commercialRegister || '',
-      inspectionType: this.editData.inspectionType || 'before_use',
-      conditionScore: this.editData.conditionScore || 80,
-      status: this.editData.status || 'Pending',
-      hasDamage: this.editData.hasDamage || false,
-      damageLevel: this.editData.damageLevel || 'none',
-      damageCost: this.editData.damageCost || 0,
-      notes: this.editData.notes || '',
-      brakes: this.editData.checklist?.brakes || false,
-      engine: this.editData.checklist?.engine || false,
-      body: this.editData.checklist?.body || false,
-      tires: this.editData.checklist?.tires || false,
-      lights: this.editData.checklist?.lights || false,
+      inspectorName: this.inspectionForm.get('inspectorName')?.value || '',
+      taxRegister: '',
+      commercialRegister: '',
+      inspectionType: 'before_use',
+      conditionScore: 80,
+      status: 'Passed',
+      hasDamage: false,
+      damageLevel: 'none',
+      damageCost: 0,
+      notes: '',
+      brakes: false,
+      engine: false,
+      body: false,
+      tires: false,
+      lights: false,
     });
 
-    this.inspectionPhotos = this.editData.photos || [];
+    this.inspectionPhotos = [];
 
-    // نقفل الحقول اللي مينفعش المفتش يغيرها في المسودة المطلوبة منه
+    // نقفل الحقول اللي مينفعش المفتش يغيرها
     this.inspectionForm.get('bookingId')?.disable();
     this.inspectionForm.get('assetId')?.disable();
     this.inspectionForm.get('inspectionType')?.disable();
@@ -138,7 +139,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
   }
 
   get filteredBookings(): any[] {
-    const type = this.inspectionForm?.getRawValue().inspectionType; // 🚀 getRawValue عشان يقرأ الـ disabled
+    const type = this.inspectionForm?.getRawValue().inspectionType; 
 
     if (type === 'before_use') {
       return (this.bookings || []).filter((b: any) => b.status === 'Confirmed');
@@ -147,7 +148,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
   }
 
   onBookingChange(): void {
-    if (this.editData) return; // نمنع التغيير لو إحنا في وضع التعديل
+    if (this.editData) return; 
 
     const bookingId = this.inspectionForm.get('bookingId')?.value;
     const booking = this.bookings.find((b: any) => b._id === bookingId);
@@ -173,12 +174,14 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
     }
 
     this.isSubmitting = true;
-    const formValues = this.inspectionForm.getRawValue(); // 🚀 لازم getRawValue عشان يقرا الحقول اللي عملنالها disable
+    const formValues = this.inspectionForm.getRawValue(); 
+    const currentUser = this.authService.getCompany(); // 🚀 نجيب بيانات المفتش الحالي
 
-    const payload: CreateInspectionPayload = {
+    const payload: any = { // 🚀 خليناها any عشان نقدر نبعت الـ inspectorId
       bookingId: formValues.bookingId,
       assetId: formValues.assetId,
       inspectorName: formValues.inspectorName,
+      inspectorId: currentUser?.id, // 🚀 الكود السحري اللي كان ناقص عشان الباك إند يعتمد التقرير
       taxRegister: formValues.taxRegister,
       commercialRegister: formValues.commercialRegister,
       inspectionType: formValues.inspectionType,
@@ -199,12 +202,8 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
     };
 
     setTimeout(() => {
-      // 🚀 التفريعة: لو فيه مسودة بنعمل تحديث، ولو مفيش بنعمل إنشاء
-      if (this.editData) {
-        this.updateInspection.emit({ id: this.editData._id, payload });
-      } else {
-        this.submitInspection.emit(payload);
-      }
+      // 🚀 دايماً بنعمل إنشاء (Create) لأن الباك إند مستني تقرير جديد يتربط بالحجز ده
+      this.submitInspection.emit(payload);
       
       this.isSubmitting = false;
       this.closeModal();
@@ -214,13 +213,13 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
   closeModal(): void {
     this.inspectionForm.reset({
       bookingId: '', assetId: '', inspectorName: '', taxRegister: '', commercialRegister: '',
-      inspectionType: 'before_use', conditionScore: 80, status: 'Pending', hasDamage: false,
+      inspectionType: 'before_use', conditionScore: 80, status: 'Passed', hasDamage: false,
       damageLevel: 'none', damageCost: 0, notes: '', photos: [], brakes: false, engine: false,
       body: false, tires: false, lights: false,
     });
-    this.inspectionForm.enable(); // نفتح الفورم تاني للمرة الجاية
+    this.inspectionForm.enable(); 
     
-    // لو المفتش، نرجع نقفل حقل الاسم
+    // نرجع نقفل حقل الاسم تاني لو ده حساب المفتش
     const currentUser = this.authService.getCompany();
     if (currentUser?.role === 'Inspector') {
       this.inspectionForm.get('inspectorName')?.disable();
