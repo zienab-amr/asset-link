@@ -136,14 +136,42 @@ export class InspectionService {
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
 
+  
     if (user && user.role === 'Inspector') {
-      this.http.get<any>(environment.apiUrl + '/api/inspectors/tasks').subscribe({
-        next: (res) => {
-          this.inspectionsSubject.next(res.data || res || []);
+      forkJoin([
+        this.http.get<any>(this.baseUrl, { params }).pipe(catchError(() => of({ data: [] }))),
+        this.http.get<any>(environment.apiUrl + '/api/inspectors/tasks').pipe(catchError(() => of({ data: [] })))
+      ]).subscribe({
+        next: ([inspectionsRes, tasksRes]) => {
+          const actualInspections = inspectionsRes.data || [];
+          const allTasks = tasksRes.data || [];
+
+          const inspectedBookingIds = new Set(
+            actualInspections.map((insp: any) => 
+              insp.bookingId?._id || insp.bookingId
+            )
+          );
+
+          const pendingDrafts = allTasks
+            .filter((task: any) => !inspectedBookingIds.has(task._id))
+            .map((task: any) => ({
+              _id: task._id, 
+              bookingId: task,
+              assetId: task.assetId,
+              status: 'Pending',
+              conditionScore: 0,
+              notes: 'No notes provided.',
+              phase: 'Inspection',
+              createdAt: task.createdAt
+            }));
+
+          const mergedList = [...pendingDrafts, ...actualInspections];
+          
+          this.inspectionsSubject.next(mergedList);
           this.loadingSubject.next(false);
         },
-        error: (err) => {
-          this.inspectionsSubject.next([]);
+        error: () => {
+          this.errorSubject.next('Failed to load inspector dashboard');
           this.loadingSubject.next(false);
         }
       });
