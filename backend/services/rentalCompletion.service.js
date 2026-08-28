@@ -2,12 +2,10 @@ const bookingModel = require("../models/booking.model");
 const assetModel = require("../models/asset.model");
 const contractModel = require("../models/contract.model");
 const bookingService = require("./booking.service");
+const escrowService = require("./escrow.service");
+const damageReportService = require("./damageReport.service");
 
-// External models merged
 const inspectionModel = require("../models/inspection.model");
-// const damageModel = require("../models/damage.model");
-// const penaltyModel = require("../models/penalty.model");
-// const maintenanceModel = require("../models/maintenance.model");
 
 const makeError = (message, statusCode) => {
   const err = new Error(message);
@@ -36,21 +34,25 @@ const completeRental = async (bookingId) => {
   if (!booking) throw makeError("Booking not found", 404);
 
   // 1. Verify Final Inspection completion
-  const inspectionModel = require("../models/inspection.model");
-  const finalInspection = await inspectionModel.findOne({ bookingId, inspectionType: "after_return" });
-  if (!finalInspection || (finalInspection.status !== "Passed" && finalInspection.status !== "completed")) {
+  // FIXED: كان بيدور على inspectionType "after_return" وده اسم غير موجود فعليًا في inspection.service.js
+  // inspection.service.js بيعتبر أي نوع غير "before_use" هو فحص ما بعد الإيجار (زي "after_use")
+  const finalInspection = await inspectionModel.findOne({ bookingId, inspectionType: "after_use" });
+  if (!finalInspection || finalInspection.status !== "Passed") {
     throw makeError("Invalid operation. Final inspection must be completed/passed before closing the rental", 400);
   }
 
   // 2. Damage decision
+  // FIXED: بدل الرفض النهائي لو hasDamage=true، بنتحقق هل الضرر اتحل فعليًا (بنالتي اتطبقت عبر penalty.service.js)
   if (finalInspection.hasDamage) {
-     throw makeError("Cannot complete rental while there is unresolved damage. Please resolve penalties first.", 400);
+    const damageReport = await damageReportService.getDamageReportByBooking(bookingId);
+    if (!damageReport || damageReport.status !== "resolved") {
+      throw makeError("Cannot complete rental while there is unresolved damage. Please resolve penalties first.", 400);
+    }
   }
 
-  // 3. No damage (or damage resolved)
-  // Reuse existing booking service for status update
+  // 3. No damage (or damage resolved) — proceed with closing the rental
   const updatedBooking = await bookingService.updateBookingStatus(booking._id, { status: "Completed" });
-  
+
   // Update Asset status using the existing pattern found in the codebase
   const updatedAsset = await assetModel.findByIdAndUpdate(
     booking.assetId,
@@ -65,7 +67,10 @@ const completeRental = async (bookingId) => {
     { new: true }
   );
 
-  return { booking: updatedBooking, asset: updatedAsset, contract: updatedContract };
+  // 4. NEW: نفرج عن فلوس الإسكرو تلقائيًا بعد ما الإيجار اتقفل بنجاح
+  const releasedEscrow = await escrowService.releaseMoney(booking._id);
+
+  return { booking: updatedBooking, asset: updatedAsset, contract: updatedContract, escrow: releasedEscrow };
 };
 
 module.exports = {

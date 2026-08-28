@@ -82,4 +82,50 @@ export class DeliveryTrackingComponent implements OnInit {
     const currentIndex = statuses.indexOf(this.selectedDelivery.status);
     return currentIndex < statuses.length - 1 ? statuses[currentIndex + 1] : '';
   }
+
+  /**
+   * بتحدد فين المعدة دلوقتي بناءً على حالة الـ delivery والـ booking المرتبط بيها.
+   * بترجع كائن فيه النص والحالة (owner/renter/closed) عشان نلوّن الكارت في الـ HTML.
+   */
+  getAssetLocation(): { label: string; holder: 'company' | 'renter' | 'closed'; description: string } {
+    if (!this.selectedDelivery) {
+      return { label: 'No data', holder: 'company', description: '' };
+    }
+
+    const booking = this.selectedDelivery.bookingId;
+
+    // الإيجار اتقفل بالكامل
+    if (booking?.status === 'Completed') {
+      return {
+        label: 'Rental Completed',
+        holder: 'closed',
+        description: 'Asset returned and rental fully closed.',
+      };
+    }
+
+    // اترجعت للشركة وبتستنى فحص after_use
+    if (booking?.returnedAt) {
+      return {
+        label: 'With Company',
+        holder: 'company',
+        description: 'Asset returned by renter, awaiting final inspection.',
+      };
+    }
+
+    // اتسلمت للمستأجر
+    if (this.selectedDelivery.status === 'Delivered') {
+      return {
+        label: 'With Renter',
+        holder: 'renter',
+        description: 'Asset delivered and currently in use by the renter.',
+      };
+    }
+
+    // لسه في مرحلة التجهيز/النقل، يعني لسه مع الشركة
+    return {
+      label: 'With Company',
+      holder: 'company',
+      description: 'Asset is being prepared/shipped and has not reached the renter yet.',
+    };
+  }
 }

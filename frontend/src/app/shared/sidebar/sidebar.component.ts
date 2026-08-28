@@ -21,6 +21,9 @@ export class SidebarComponent implements OnInit {
   companyLogo = '';
   userRole = '';
 
+  // حالة الفتح/القفل بتاعة السايد بار
+  isCollapsed = false;
+
   platformItems: SidebarItem[] = [
     { title: 'Dashboard', icon: 'layout-dashboard', route: '/app/dashboard' },
     { title: 'Assets', icon: 'boxes', route: '/app/assets/add', badge: 8 },
@@ -46,17 +49,23 @@ export class SidebarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // بنقرا حالة الفتح/القفل المحفوظة سابقًا (لو موجودة)
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    if (savedState !== null) {
+      this.isCollapsed = savedState === 'true';
+    }
+
     const userStr = localStorage.getItem('user');
-    
+
     if (userStr) {
       const user = JSON.parse(userStr);
-      
+
       // بنسأل سؤال صريح ومباشر بناءً على الـ JSON بتاعك
       if (user.role === 'Inspector') {
         this.userRole = 'Inspector';
         this.companyName = user.fullName; // هيقرا اسمك Zeinab Amr
         this.companyRole = 'Equipment Inspector';
-        
+
         // نخفي القوائم للمفتش
         this.platformItems = [
           { title: 'My Inspections', icon: 'clipboard-check', route: '/app/inspections' }
@@ -95,6 +104,15 @@ export class SidebarComponent implements OnInit {
       .join('')
       .substring(0, 2)
       .toUpperCase();
+  }
+
+  /**
+   * بتفتح أو تقفل السايد بار، وبتحفظ الحالة في localStorage
+   * عشان تفضل زي ما سيبتها المستخدم لو عمل refresh للصفحة.
+   */
+  toggleSidebar(): void {
+    this.isCollapsed = !this.isCollapsed;
+    localStorage.setItem('sidebarCollapsed', String(this.isCollapsed));
   }
 
   logout(): void {

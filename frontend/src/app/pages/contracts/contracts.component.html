@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="p-4 sm:p-6">
   <h2 class="text-2xl font-bold text-text">Contracts</h2>
   <p class="text-text-muted text-sm mt-1 mb-5">
     Review, approve, and manage all equipment lease agreements.
@@ -34,9 +34,9 @@
     </select>
   </div>
 
-  <div class="flex gap-5">
+  <div class="flex flex-col lg:flex-row gap-5">
     <!-- Table -->
-    <div class="flex-1">
+    <div class="flex-1 min-w-0">
       <p *ngIf="isLoading" class="text-sm text-text-muted mb-4">Loading contracts...</p>
 
       <app-data-table
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Contract Detail Panel -->
-    <div *ngIf="selectedContract" class="w-96 bg-white border border-border rounded-xl p-5 h-fit shadow-sm">
+    <div *ngIf="selectedContract" class="w-full lg:w-96 bg-white border border-border rounded-xl p-5 h-fit shadow-sm">
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-semibold text-text text-lg">Contract Details</h3>
         <button (click)="closePanel()" class="text-text-muted hover:text-text text-lg cursor-pointer">✕</button>
@@ -112,18 +112,18 @@
       <hr class="mb-4" />
 
       <!-- Action Buttons -->
-      <div *ngIf="selectedContract.status === 'Draft' && isOwner(selectedContract)" class="flex gap-2 mb-3">
+      <div *ngIf="selectedContract.status === 'Draft' && isOwner(selectedContract)" class="flex flex-col sm:flex-row gap-2 mb-3">
         <button
           (click)="approveContract()"
           [disabled]="actionLoading"
-          class="flex-1 py-2 px-4 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 cursor-pointer"
+          class="flex-1 py-2 px-4 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 cursor-pointer transition-colors"
         >
           {{ actionLoading ? 'Processing...' : '✓ Approve' }}
         </button>
         <button
           (click)="rejectContract()"
           [disabled]="actionLoading"
-          class="flex-1 py-2 px-4 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+          class="flex-1 py-2 px-4 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 cursor-pointer transition-colors"
         >
           {{ actionLoading ? 'Processing...' : '✗ Reject' }}
         </button>
@@ -138,17 +138,21 @@
         ⏳ Waiting for renter to pay...
       </p>
 
-      <!-- Payment Button for Renter -->
-      <div *ngIf="selectedContract.status === 'Active' && isRenter(selectedContract)" class="mb-3">
-        <p class="text-xs text-amber-600 bg-amber-50 p-2 rounded mb-2">
-          ⚠️ Payment is required to activate the contract and escrow.
-        </p>
+      <!-- Payment Section for Renter -->
+      <div *ngIf="selectedContract.status === 'Active' && isRenter(selectedContract)" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 sm:p-4">
+        <div class="flex items-start gap-2 mb-3">
+          <span class="text-base leading-none shrink-0">⚠️</span>
+          <p class="text-xs sm:text-sm text-amber-700 leading-relaxed">
+            Payment is required to activate the contract and escrow.
+          </p>
+        </div>
         <button
           (click)="payContract()"
           [disabled]="actionLoading"
-          class="w-full py-2 px-4 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+          class="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 text-sm sm:text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
-          {{ actionLoading ? 'Processing Payment...' : '💳 Pay Now (Escrow)' }}
+          <span *ngIf="!actionLoading">💳</span>
+          <span>{{ actionLoading ? 'Processing Payment...' : 'Pay Now (Escrow)' }}</span>
         </button>
       </div>
 
@@ -159,7 +163,7 @@
         </p>
         <button
           (click)="openDeliveryModal()"
-          class="w-full py-2 px-4 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer"
+          class="w-full py-2 px-4 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer transition-colors"
         >
           🚚 Create Delivery
         </button>
@@ -182,19 +186,19 @@
         <button
           (click)="generatePdf()"
           [disabled]="actionLoading"
-          class="w-full py-2 text-sm font-semibold text-primary border border-primary rounded-lg hover:bg-primary/5 disabled:opacity-50 cursor-pointer"
+          class="w-full py-2 text-sm font-semibold text-primary border border-primary rounded-lg hover:bg-primary/5 disabled:opacity-50 cursor-pointer transition-colors"
         >
           📄 Generate PDF
         </button>
         <button
           (click)="downloadPdf(selectedContract._id)"
-          class="w-full py-2 text-sm font-semibold text-text border border-border rounded-lg hover:bg-slate-50 cursor-pointer"
+          class="w-full py-2 text-sm font-semibold text-text border border-border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
         >
           ⬇ Download PDF
         </button>
         <button
           (click)="viewPdf(selectedContract._id)"
-          class="w-full py-2 text-sm font-semibold text-text border border-border rounded-lg hover:bg-slate-50 cursor-pointer"
+          class="w-full py-2 text-sm font-semibold text-text border border-border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
         >
           👁 View PDF
         </button>
@@ -203,8 +207,8 @@
   </div>
 
   <!-- Delivery Modal -->
-  <div *ngIf="showDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+  <div *ngIf="showDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
       <h3 class="text-xl font-bold text-text mb-4">Create Delivery</h3>
 
       <div class="space-y-4">
@@ -230,11 +234,11 @@
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 mt-6">
-        <button (click)="closeDeliveryModal()" class="px-4 py-2 text-sm font-medium text-text-muted bg-gray-100 rounded-lg hover:bg-gray-200">
+      <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+        <button (click)="closeDeliveryModal()" class="px-4 py-2 text-sm font-medium text-text-muted bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
           Cancel
         </button>
-        <button (click)="submitDelivery()" [disabled]="actionLoading" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover disabled:opacity-50">
+        <button (click)="submitDelivery()" [disabled]="actionLoading" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover disabled:opacity-50 transition-colors">
           {{ actionLoading ? 'Saving...' : 'Create' }}
         </button>
       </div>

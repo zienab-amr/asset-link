@@ -1,5 +1,14 @@
 const damageReportService = require("../services/damageReport.service");
 
+const createDamageReport = async (req, res) => {
+  try {
+    const damageReport = await damageReportService.createDamageReport(req.body);
+    return res.status(201).send(damageReport);
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+};
+
 const getDamageReportByBooking = async (req, res) => {
   try {
     const damageReport = await damageReportService.getDamageReportByBooking(
@@ -40,6 +49,7 @@ const updateDamageReportStatus = async (req, res) => {
 };
 
 module.exports = {
+  createDamageReport,
   getDamageReportByBooking,
   getAllDamageReports,
   updateDamageReportStatus,

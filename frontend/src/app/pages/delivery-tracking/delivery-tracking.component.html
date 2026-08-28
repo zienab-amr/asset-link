@@ -76,6 +76,86 @@
       ></app-delivery-event-log>
     </div>
 
-    <div class="lg:col-span-1"></div>
+    <div class="lg:col-span-1">
+      <!-- Asset Location Card -->
+      <div *ngIf="selectedDelivery" class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+        <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Asset Location
+        </h3>
+
+        <!-- Status Pill -->
+        <div class="mb-4">
+          <span
+            class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold"
+            [ngClass]="{
+              'bg-amber-100 text-amber-700': getAssetLocation().holder === 'company',
+              'bg-blue-100 text-blue-700': getAssetLocation().holder === 'renter',
+              'bg-emerald-100 text-emerald-700': getAssetLocation().holder === 'closed'
+            }"
+          >
+            {{ getAssetLocation().label }}
+          </span>
+        </div>
+
+        <p class="text-xs text-slate-500 mb-5 leading-relaxed">
+          {{ getAssetLocation().description }}
+        </p>
+
+        <!-- Two-party progress track -->
+        <div class="flex items-center justify-between">
+          <div class="flex flex-col items-center gap-2 flex-1">
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors"
+              [ngClass]="
+                getAssetLocation().holder === 'company'
+                  ? 'bg-amber-500 border-amber-500 text-white'
+                  : 'bg-white border-slate-200 text-slate-400'
+              "
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5" />
+              </svg>
+            </div>
+            <span class="text-xs font-medium text-slate-600">Company</span>
+          </div>
+
+          <div class="flex-1 h-0.5 mx-1 mt-[-20px]"
+               [ngClass]="getAssetLocation().holder === 'company' ? 'bg-slate-200' : 'bg-blue-400'">
+          </div>
+
+          <div class="flex flex-col items-center gap-2 flex-1">
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors"
+              [ngClass]="
+                getAssetLocation().holder === 'renter'
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'bg-white border-slate-200 text-slate-400'
+              "
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <span class="text-xs font-medium text-slate-600">Renter</span>
+          </div>
+        </div>
+
+        <!-- Closed state note -->
+        <div *ngIf="getAssetLocation().holder === 'closed'" class="mt-4 flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 rounded-lg px-3 py-2">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Asset back with company — rental closed.
+        </div>
+      </div>
+
+      <p *ngIf="!selectedDelivery" class="text-sm text-slate-400 text-center py-8">
+        Select a delivery to see asset location.
+      </p>
+    </div>
   </div>
 </div>

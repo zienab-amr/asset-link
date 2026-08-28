@@ -3,6 +3,7 @@ const penaltyModel = require("../models/penalty.model");
 const assetModel = require("../models/asset.model");
 const bookingModel = require("../models/booking.model");
 const escrowService = require("./escrow.service");
+const damageReportService = require("./damageReport.service");
 
 const makeError = (message, statusCode) => {
   const err = new Error(message);
@@ -57,7 +58,7 @@ const createPenalty = async (data) => {
 
   // 1. Fetch Escrow to get the security deposit
   const escrow = await escrowService.getEscrowByBooking(bookingId);
-  
+
   // 2. Calculate Penalty Amount
   const penaltyAmount = calculatePenalty(damageCost, escrow.securityDeposit);
 
@@ -75,6 +76,12 @@ const createPenalty = async (data) => {
 
   // 5. Trigger Maintenance
   await triggerMaintenance(assetId);
+
+  // 6. NEW: نعلّم الـ DamageReport كـ "resolved" عشان completeRental يقدر يقفل الإيجار بعد كده
+  const damageReport = await damageReportService.getDamageReportByBooking(bookingId);
+  if (damageReport) {
+    await damageReportService.updateDamageReportStatus(damageReport._id, "resolved");
+  }
 
   return penalty;
 };
