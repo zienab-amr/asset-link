@@ -65,7 +65,7 @@
 
         inspectionType: {
             type: String,
-            enum: ['before_use', 'after_return'],
+            enum: ['before_use', 'after_use'],
             required: true,
             default: 'before_use'
         },

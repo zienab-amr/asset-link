@@ -5,6 +5,9 @@ import { ContractService } from '../../services/contract.service';
 import { AuthService } from '../../services/auth.service';
 import { PaymentsEscrowService, BillingData } from '../../services/payments-escrow.service';
 import { DeliveryService } from '../../services/delivery.service';
+import { RentalCompletionService } from '../../services/rental-completion.service';
+import { PenaltyService } from '../../services/penalty.service';
+import { DamageReportService } from '../../services/damage-report.service';
 
 @Component({
   selector: 'app-contracts',
@@ -38,6 +41,11 @@ export class ContractsComponent implements OnInit, OnDestroy {
   private paymentPopup: Window | null = null;
   private paymentPollingSub?: Subscription;
 
+  // Rental Completion State
+  damageReport: any = null;
+  loadingDamageReport = false;
+  penaltyLoading = false;
+
   statusOptions = ['All', 'Draft', 'Active', 'Approved', 'Rejected', 'Completed'];
 
   columns = [
@@ -53,7 +61,10 @@ export class ContractsComponent implements OnInit, OnDestroy {
     private contractService: ContractService,
     private authService: AuthService,
     private paymentService: PaymentsEscrowService,
-    private deliveryService: DeliveryService
+    private deliveryService: DeliveryService,
+    private rentalCompletionService: RentalCompletionService,
+    private penaltyService: PenaltyService,
+    private damageReportService: DamageReportService
   ) {}
 
   ngOnInit(): void {
@@ -82,6 +93,14 @@ export class ContractsComponent implements OnInit, OnDestroy {
         }));
         this.applyFilter();
         this.isLoading = false;
+
+        if (this.selectedContract) {
+          const refreshed = this.contracts.find((c) => c._id === this.selectedContract._id);
+          if (refreshed) {
+            this.selectedContract = refreshed;
+            this.checkDamageReport();
+          }
+        }
       },
       error: (err: any) => {
         this.isLoading = false;
@@ -113,10 +132,13 @@ export class ContractsComponent implements OnInit, OnDestroy {
     this.selectedContract = contract;
     this.successMessage = '';
     this.errorMessage = '';
+    this.damageReport = null;
+    this.checkDamageReport();
   }
 
   closePanel() {
     this.selectedContract = null;
+    this.damageReport = null;
   }
 
   isOwner(contract: any): boolean {
@@ -171,11 +193,6 @@ export class ContractsComponent implements OnInit, OnDestroy {
     return this.companyId === renterId;
   }
 
-  /**
-   * بتجهز billingData من بيانات الشركة بتاعت المستخدم.
-   * Paymob بيطلب حقول العنوان (street, building, floor, apartment, city, country)
-   * حتى لو مش موجودة فعليًا عند الشركة، فبنبعتها بقيم افتراضية ثابتة.
-   */
   private buildBillingData(): BillingData {
     const company = this.authService.getCompany();
     return {
@@ -214,10 +231,6 @@ export class ContractsComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * بتفتح صفحة الدفع بتاعة Paymob في نافذة منبثقة حقيقية (popup)
-   * في منتصف الشاشة، بدل ما تكون iframe جوه الصفحة نفسها.
-   */
   private openPaymentPopup(url: string) {
     const width = 500;
     const height = 700;
@@ -235,11 +248,6 @@ export class ContractsComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * بعد ما المستخدم يدخل بيانات الكارت في نافذة الـ popup، Paymob بتبعت webhook
-   * للباك إند. هنا بنسأل كل 4 ثواني عن حالة الدفع لحد ما تتغير.
-   * كمان بنراقب لو المستخدم قفل الـ popup يدوي قبل ما الدفع يخلص، عشان نوقف الـ polling.
-   */
   private startPaymentPolling() {
     if (!this.currentPaymentId) return;
 
@@ -258,7 +266,6 @@ export class ContractsComponent implements OnInit, OnDestroy {
             this.finishPaymentFlow();
             this.errorMessage = 'Payment failed. Please try again.';
           } else if (this.paymentPopup && this.paymentPopup.closed) {
-            // المستخدم قفل الـ popup يدوي قبل ما الدفع يخلص أو يفشل رسميًا
             this.finishPaymentFlow();
             this.errorMessage = 'Payment window was closed before completion.';
           }
@@ -352,5 +359,102 @@ export class ContractsComponent implements OnInit, OnDestroy {
       case 'Completed': return 'status-completed';
       default: return '';
     }
+  }
+
+  // ==========================================
+  // Rental Completion Flow (Return / Damage / Penalty / Complete)
+  // ==========================================
+
+  get bookingId(): string {
+    if (!this.selectedContract) return '';
+    return this.selectedContract.bookingId?._id || this.selectedContract.bookingId;
+  }
+
+  get isReturned(): boolean {
+    return !!this.selectedContract?.bookingId?.returnedAt;
+  }
+
+  checkDamageReport(): void {
+    if (!this.selectedContract || !this.isReturned) {
+      this.damageReport = null;
+      return;
+    }
+
+    this.loadingDamageReport = true;
+    this.damageReportService.getDamageReportByBooking(this.bookingId).subscribe({
+      next: (report: any) => {
+        this.damageReport = report;
+        this.loadingDamageReport = false;
+      },
+      error: () => {
+        this.damageReport = null;
+        this.loadingDamageReport = false;
+      },
+    });
+  }
+
+  returnAsset(): void {
+    if (!this.selectedContract) return;
+    this.actionLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.rentalCompletionService.returnAsset(this.bookingId).subscribe({
+      next: () => {
+        this.actionLoading = false;
+        this.successMessage = 'Asset marked as returned. Waiting for final inspection.';
+        this.loadContracts();
+      },
+      error: (err: any) => {
+        this.actionLoading = false;
+        this.errorMessage = err.error?.message || err.error?.error || 'Failed to mark asset as returned';
+      },
+    });
+  }
+
+  applyPenalty(): void {
+    if (!this.selectedContract || !this.damageReport) return;
+    this.penaltyLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const assetId = this.selectedContract.assetId?._id || this.selectedContract.assetId;
+
+    this.penaltyService.createPenalty({
+      bookingId: this.bookingId,
+      assetId,
+      damageCost: this.damageReport.damageCost,
+      damageLevel: this.damageReport.damageLevel,
+    }).subscribe({
+      next: () => {
+        this.penaltyLoading = false;
+        this.successMessage = 'Penalty applied and deducted from security deposit.';
+        this.checkDamageReport();
+      },
+      error: (err: any) => {
+        this.penaltyLoading = false;
+        this.errorMessage = err.error?.message || err.error?.error || 'Failed to apply penalty';
+      },
+    });
+  }
+
+  completeRental(): void {
+    if (!this.selectedContract) return;
+    this.actionLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.rentalCompletionService.completeRental(this.bookingId).subscribe({
+      next: () => {
+        this.actionLoading = false;
+        this.successMessage = 'Rental completed successfully! Escrow released.';
+        this.selectedContract.status = 'Completed';
+        this.loadContracts();
+      },
+      error: (err: any) => {
+        this.actionLoading = false;
+        this.errorMessage = err.error?.message || err.error?.error || 'Failed to complete rental';
+      },
+    });
   }
 }

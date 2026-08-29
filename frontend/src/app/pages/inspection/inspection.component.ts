@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InspectionService } from './services/inspection.service';
 import { InspectorService } from '../../services/inspector.service';
+import { DamageReportService } from '../../services/damage-report.service';
 import {
   InspectionRecord,
   InspectionStatus,
@@ -18,7 +19,7 @@ export class InspectionComponent implements OnInit {
   userRole: string = '';
   selectedInspection: any = null;
   filteredInspections$: Observable<InspectionRecord[]>;
-  
+
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
 
@@ -28,53 +29,47 @@ export class InspectionComponent implements OnInit {
   assets: any[] = [];
   bookings: any[] = [];
   inspectionStats = {
-  total: 0,
-  pending: 0,
-  passed: 0,
-  failed: 0,
-};
-private calculateStats(inspections: InspectionRecord[]): void {
-  this.inspectionStats = {
-    total: inspections.length,
-    pending: inspections.filter((i) => i.status?.toLowerCase() === 'pending').length,
-    passed: inspections.filter((i) => i.status?.toLowerCase() === 'passed').length,
-    failed: inspections.filter((i) => i.status?.toLowerCase() === 'failed').length,
+    total: 0,
+    pending: 0,
+    passed: 0,
+    failed: 0,
   };
-}
+  private calculateStats(inspections: InspectionRecord[]): void {
+    this.inspectionStats = {
+      total: inspections.length,
+      pending: inspections.filter((i) => i.status?.toLowerCase() === 'pending').length,
+      passed: inspections.filter((i) => i.status?.toLowerCase() === 'passed').length,
+      failed: inspections.filter((i) => i.status?.toLowerCase() === 'failed').length,
+    };
+  }
 
-  // Delete confirmation
   showDeleteConfirm = false;
   inspectionToDelete: InspectionRecord | null = null;
   deleteError: string | null = null;
 
   activeFilter: 'all' | 'Pre-Rental' | 'Post-Rental' = 'all';
 
-  // Figma-matching state
   activeInsp: string | null = null;
   startedIds: Set<string> = new Set();
 
-  // Inspector identity stats
   inspectorStats = {
     assignedToday: 3,
     highPriority: 1,
     completedMtd: 12,
   };
 
-  // Priority metadata matching Figma
   priorityMeta: Record<string, { label: string; color: string; bg: string; border: string }> = {
     high: { label: 'High Priority', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-100' },
     medium: { label: 'Medium Priority', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-100' },
     low: { label: 'Low Priority', color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-100' },
   };
 
-  // Phase metadata matching Figma
   phaseMeta: Record<string, { label: string; color: string; bg: string; border: string }> = {
     'Pre-Rental': { label: 'Pre-Rental', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-100' },
     'Post-Rental': { label: 'Post-Rental', color: 'text-teal-700', bg: 'bg-teal-50', border: 'border-teal-100' },
     'Inspection': { label: 'Inspection', color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-100' },
   };
 
-  // Gradient configs per inspection index
   gradientConfigs = [
     { from: '#1E40AF', to: '#0E7490', accent: '#38BDF8' },
     { from: '#78350F', to: '#B45309', accent: '#FCD34D' },
@@ -87,10 +82,10 @@ private calculateStats(inspections: InspectionRecord[]): void {
   constructor(
     private inspectionService: InspectionService,
     private authService: AuthService,
-    private inspectorService: InspectorService
+    private inspectorService: InspectorService,
+    private damageReportService: DamageReportService
   ) {
     this.filteredInspections$ = this.inspectionService.filteredInspections$;
-   
     this.loading$ = this.inspectionService.loading$;
     this.error$ = this.inspectionService.error$;
   }
@@ -99,13 +94,13 @@ private calculateStats(inspections: InspectionRecord[]): void {
     const currentUser = this.authService.getCompany();
     this.userRole = currentUser?.role || 'Company';
 
-  this.inspectionService.loadInspections();
-  this.loadDropdownData();
+    this.inspectionService.loadInspections();
+    this.loadDropdownData();
 
-  this.filteredInspections$.subscribe((inspections) => {
-    this.calculateStats(inspections);
-  });
-}
+    this.filteredInspections$.subscribe((inspections) => {
+      this.calculateStats(inspections);
+    });
+  }
 
   setPhaseFilter(phase: 'all' | 'Pre-Rental' | 'Post-Rental'): void {
     this.activeFilter = phase;
@@ -141,13 +136,38 @@ private calculateStats(inspections: InspectionRecord[]): void {
 
   closeCreateModal(): void {
     this.isCreateModalOpen = false;
-    this.selectedInspection = null; 
+    this.selectedInspection = null;
   }
 
+  /**
+   * بعد ما الفحص يتسجل بنجاح، لو فيه ضرر (hasDamage)، بننادي createDamageReport
+   * تلقائيًا عشان penalty.service.js يقدر يلاقيه بعد كده (عن طريق getDamageReportByBooking).
+   */
   handleNewInspection(payload: CreateInspectionPayload): void {
     this.inspectionService.createInspection(payload).subscribe({
-      next: () => {
-        this.closeCreateModal();
+      next: (createdInspection: any) => {
+        const p = payload as any;
+
+        if (p.hasDamage) {
+          const damagePayload = {
+            inspection: createdInspection._id,
+            booking: p.bookingId,
+            damageCost: p.damageCost,
+            damageLevel: p.damageLevel,
+            description: p.notes || '',
+          };
+
+          this.damageReportService.createDamageReport(damagePayload).subscribe({
+            next: () => this.closeCreateModal(),
+            error: (err) => {
+              // الفحص نفسه اتسجل بنجاح، بس تقرير الضرر فشل - نعلّم في الكونسول ونكمل عادي
+              console.error('Inspection saved, but failed to create damage report:', err);
+              this.closeCreateModal();
+            },
+          });
+        } else {
+          this.closeCreateModal();
+        }
       },
       error: (err) => {
         console.error('Failed to create inspection:', err);
@@ -155,7 +175,6 @@ private calculateStats(inspections: InspectionRecord[]): void {
     });
   }
 
-  // Figma-matching methods
   toggleExpand(inspId: string): void {
     this.activeInsp = this.activeInsp === inspId ? null : inspId;
   }
@@ -199,7 +218,6 @@ private calculateStats(inspections: InspectionRecord[]): void {
       .toUpperCase();
   }
 
-  // Delete flow
   confirmDelete(record: InspectionRecord): void {
     this.inspectionToDelete = record;
     this.showDeleteConfirm = true;

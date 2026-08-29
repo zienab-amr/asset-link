@@ -12,19 +12,21 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
   @Input() isOpen = false;
   @Input() assets: any[] = [];
   @Input() bookings: any[] = [];
-  @Input() editData: any = null; 
+  @Input() editData: any = null;
 
   @Output() close = new EventEmitter<void>();
-  @Output() submitInspection = new EventEmitter<any>(); 
+  @Output() submitInspection = new EventEmitter<any>();
 
   inspectionForm!: FormGroup;
   isSubmitting = false;
 
   inspectionPhotos: string[] = [];
 
+  // FIXED: 'after_return' -> 'after_use' عشان يتطابق مع rentalCompletion.service.js
+  // اللي بيدور تحديدًا على inspectionType === "after_use"
   inspectionTypes = [
     { value: 'before_use', label: 'Before Rental' },
-    { value: 'after_return', label: 'After Rental' },
+    { value: 'after_use', label: 'After Rental' },
   ];
 
   damageLevels = ['none', 'minor', 'moderate', 'severe'];
@@ -32,7 +34,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService 
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -44,8 +46,8 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
       if (this.editData) {
         this.patchFormWithEditData();
       } else {
-        this.inspectionForm.enable(); 
-        
+        this.inspectionForm.enable();
+
         const currentUser = this.authService.getCompany();
         if (currentUser?.role === 'Inspector') {
           this.inspectionForm.get('inspectorName')?.disable();
@@ -62,9 +64,9 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
       bookingId: ['', Validators.required],
       assetId: ['', Validators.required],
       inspectorName: [
-              isInspector ? currentUser.fullName : '', 
-              [Validators.required, Validators.minLength(2)]
-            ],
+        isInspector ? currentUser.fullName : '',
+        [Validators.required, Validators.minLength(2)]
+      ],
       taxRegister: [''],
       commercialRegister: [''],
       inspectionType: ['before_use', Validators.required],
@@ -72,12 +74,12 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
         80,
         [Validators.required, Validators.min(0), Validators.max(100)],
       ],
-      status: ['Passed', Validators.required], 
+      status: ['Passed', Validators.required],
       hasDamage: [false],
       damageLevel: ['none'],
       damageCost: [0],
       notes: ['', Validators.minLength(3)],
-      photos: [[]], 
+      photos: [[]],
       brakes: [false],
       engine: [false],
       body: [false],
@@ -88,7 +90,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
     this.inspectionForm
       .get('inspectionType')
       ?.valueChanges.subscribe(() => {
-        if (!this.editData) { 
+        if (!this.editData) {
           this.onInspectionTypeChange();
         }
       });
@@ -106,7 +108,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
     if (!this.inspectionForm) return;
 
     this.inspectionForm.patchValue({
-      bookingId: this.editData._id || '', // 🚀 الـ ID بتاع المسودة هو الـ ID بتاع الحجز
+      bookingId: this.editData._id || '',
       assetId: this.editData.assetId?._id || this.editData.assetId || '',
       inspectorName: this.inspectionForm.get('inspectorName')?.value || '',
       taxRegister: '',
@@ -127,7 +129,6 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
 
     this.inspectionPhotos = [];
 
-    // نقفل الحقول اللي مينفعش المفتش يغيرها
     this.inspectionForm.get('bookingId')?.disable();
     this.inspectionForm.get('assetId')?.disable();
     this.inspectionForm.get('inspectionType')?.disable();
@@ -139,16 +140,20 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
   }
 
   get filteredBookings(): any[] {
-    const type = this.inspectionForm?.getRawValue().inspectionType; 
+    const type = this.inspectionForm?.getRawValue().inspectionType;
 
+    // FIXED: كان بيفلتر على status === 'Completed' للـ after_use
+    // لكن الـ booking بيتحول لـ Completed بس بعد ما الفحص ده نفسه يخلص!
+    // يعني الدروب داون كان هيفضل فاضي دايمًا. الصح إن الـ booking
+    // بيفضل "Confirmed" طول فترة الإيجار (قبل وبعد الرجوع)، لحد ما يتقفل فعليًا.
     if (type === 'before_use') {
       return (this.bookings || []).filter((b: any) => b.status === 'Confirmed');
     }
-    return (this.bookings || []).filter((b: any) => b.status === 'Completed');
+    return (this.bookings || []).filter((b: any) => b.status === 'Confirmed');
   }
 
   onBookingChange(): void {
-    if (this.editData) return; 
+    if (this.editData) return;
 
     const bookingId = this.inspectionForm.get('bookingId')?.value;
     const booking = this.bookings.find((b: any) => b._id === bookingId);
@@ -174,14 +179,14 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
     }
 
     this.isSubmitting = true;
-    const formValues = this.inspectionForm.getRawValue(); 
-    const currentUser = this.authService.getCompany(); // 🚀 نجيب بيانات المفتش الحالي
+    const formValues = this.inspectionForm.getRawValue();
+    const currentUser = this.authService.getCompany();
 
-    const payload: any = { // 🚀 خليناها any عشان نقدر نبعت الـ inspectorId
+    const payload: any = {
       bookingId: formValues.bookingId,
       assetId: formValues.assetId,
       inspectorName: formValues.inspectorName,
-      inspectorId: currentUser?.id, // 🚀 الكود السحري اللي كان ناقص عشان الباك إند يعتمد التقرير
+      inspectorId: currentUser?.id,
       taxRegister: formValues.taxRegister,
       commercialRegister: formValues.commercialRegister,
       inspectionType: formValues.inspectionType,
@@ -191,7 +196,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
       damageLevel: formValues.damageLevel,
       damageCost: formValues.damageCost,
       notes: formValues.notes || '',
-      photos: this.inspectionPhotos, 
+      photos: this.inspectionPhotos,
       checklist: {
         brakes: formValues.brakes,
         engine: formValues.engine,
@@ -202,9 +207,7 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
     };
 
     setTimeout(() => {
-      // 🚀 دايماً بنعمل إنشاء (Create) لأن الباك إند مستني تقرير جديد يتربط بالحجز ده
       this.submitInspection.emit(payload);
-      
       this.isSubmitting = false;
       this.closeModal();
     }, 300);
@@ -217,16 +220,15 @@ export class CreateInspectionModalComponent implements OnInit, OnChanges {
       damageLevel: 'none', damageCost: 0, notes: '', photos: [], brakes: false, engine: false,
       body: false, tires: false, lights: false,
     });
-    this.inspectionForm.enable(); 
-    
-    // نرجع نقفل حقل الاسم تاني لو ده حساب المفتش
+    this.inspectionForm.enable();
+
     const currentUser = this.authService.getCompany();
     if (currentUser?.role === 'Inspector') {
       this.inspectionForm.get('inspectorName')?.disable();
       this.inspectionForm.patchValue({ inspectorName: currentUser.fullName });
     }
 
-    this.inspectionPhotos = []; 
+    this.inspectionPhotos = [];
     this.close.emit();
   }
 }
