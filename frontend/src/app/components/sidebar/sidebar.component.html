@@ -1,71 +1,104 @@
-<aside class="sidebar">
-  <!-- Top Section: Logo & Nav -->
-  <div class="sidebar-top">
-    <!-- Logo -->
-    <div class="logo-container">
-      <div class="logo-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
-      </div>
-      <div class="logo-text">
-        <h2>AssetLink</h2>
-        <span>ENTERPRISE</span>
-      </div>
-    </div>
+<div class="flex h-screen flex-col bg-[#111827] text-white transition-all duration-300"
+     [ngClass]="isCollapsed ? 'w-[80px]' : 'w-[300px]'">
 
-    <!-- PLATFORM Section -->
-    <div class="nav-section">
-      <p class="section-title">PLATFORM</p>
-      <nav class="nav-list">
-        <button 
-          *ngFor="let item of navItems" 
-          [routerLink]="['/' + item.id]"
-          routerLinkActive="active"
-          class="nav-item">
-          <div class="item-left">
-            <span class="icon">●</span>
-            <span>{{ item.label }}</span>
-          </div>
-          <span *ngIf="item.badge" class="badge">
-            {{ item.badge }}
-          </span>
-        </button>
-      </nav>
-    </div>
-
-    <!-- ACCOUNT Section -->
-    <div class="nav-section">
-      <p class="section-title">ACCOUNT</p>
-      <button 
-        routerLink="/company"
-        routerLinkActive="active"
-        class="nav-item">
-        <div class="item-left">
-          <span class="icon">🏢</span>
-          <span>Company</span>
+  <!-- Logo -->
+  <div class="border-b border-slate-700 px-4 py-6 shrink-0">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600">
+          <lucide-icon name="layers" class="h-6 w-6 text-white"></lucide-icon>
         </div>
+        <div *ngIf="!isCollapsed" class="overflow-hidden whitespace-nowrap">
+          <h2 class="text-xl font-bold leading-tight">AssetLink</h2>
+          <p class="text-xs uppercase tracking-widest text-slate-400">Enterprise</p>
+        </div>
+      </div>
+
+      <!-- Toggle Button (expanded state) -->
+      <button
+        *ngIf="!isCollapsed"
+        type="button"
+        (click)="toggleSidebar()"
+        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer transition-colors"
+        title="Collapse sidebar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+        </svg>
       </button>
     </div>
+
+    <!-- Toggle Button (collapsed state, centered below logo) -->
+    <button
+      *ngIf="isCollapsed"
+      type="button"
+      (click)="toggleSidebar()"
+      class="mt-3 flex h-8 w-full items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer transition-colors"
+      title="Expand sidebar"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+      </svg>
+    </button>
   </div>
 
-  <!-- Bottom Section: Inspection Box & User Profile -->
-  <div class="sidebar-bottom">
-    <div class="inspection-card" routerLink="/inspections" style="cursor: pointer;">
-      <div class="card-header">
-        <span class="dot"></span>
-        3 inspections due
-      </div>
-      <p class="card-sub">Review before booking</p>
+  <!-- Menu -->
+  <div class="sidebar-scroll flex-1 overflow-y-auto overflow-x-hidden px-3 py-6">
+    <p *ngIf="!isCollapsed" class="mb-3 px-3 text-xs font-semibold uppercase tracking-widest text-slate-500">Platform</p>
+
+    <div class="space-y-1">
+      <a *ngFor="let item of platformItems"
+         [routerLink]="item.route"
+         routerLinkActive="bg-[#2563EB] text-white shadow-md"
+         [routerLinkActiveOptions]="{ exact: true }"
+         [title]="isCollapsed ? item.title : ''"
+         class="group flex h-12 items-center rounded-xl px-4 text-[15px] font-medium text-slate-300 transition-all duration-200 hover:bg-slate-800 hover:text-white"
+         [ngClass]="isCollapsed ? 'justify-center' : 'justify-between'">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <lucide-icon [name]="item.icon" class="h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-white"></lucide-icon>
+          <span *ngIf="!isCollapsed" class="font-medium whitespace-nowrap">{{ item.title }}</span>
+        </div>
+      </a>
     </div>
 
-    <div class="user-profile">
-      <div class="user-info">
-        <div class="avatar">MC</div>
-        <div class="user-details">
-          <span class="user-name">Marcus Chen</span>
-          <span class="user-role">Fleet Manager · Terr...</span>
+    <div class="mt-6" *ngIf="accountItems.length > 0">
+      <p *ngIf="!isCollapsed" class="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">ACCOUNT</p>
+      <div class="space-y-1">
+        <a *ngFor="let item of accountItems"
+           [routerLink]="item.route"
+           routerLinkActive="bg-[#2563EB] text-white shadow-md"
+           [routerLinkActiveOptions]="{ exact: true }"
+           [title]="isCollapsed ? item.title : ''"
+           class="group flex h-12 items-center rounded-xl px-4 text-[15px] font-medium text-slate-300 transition-all duration-200 hover:bg-slate-800 hover:text-white"
+           [ngClass]="isCollapsed ? 'justify-center' : 'justify-between'">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <lucide-icon [name]="item.icon" class="h-5 w-5 shrink-0 text-slate-400"></lucide-icon>
+            <span *ngIf="!isCollapsed" class="font-medium whitespace-nowrap">{{ item.title }}</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile -->
+  <div class="shrink-0 border-t border-slate-800 p-3">
+    <button type="button" (click)="logout()"
+            class="group flex w-full items-center rounded-xl bg-slate-800/50 px-3 py-2.5 transition-colors hover:bg-slate-800"
+            [ngClass]="isCollapsed ? 'h-14 justify-center' : 'h-[68px] justify-between'"
+            [title]="isCollapsed ? (companyName || 'User') : ''">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500">
+          <span class="text-sm font-bold text-white">{{ initials || 'U' }}</span>
+        </div>
+        <div *ngIf="!isCollapsed" class="overflow-hidden text-left">
+          <h4 class="truncate text-[14px] font-semibold text-white">{{ companyName || 'User' }}</h4>
+          <p class="truncate text-xs text-slate-400">{{ companyRole || 'Role' }}</p>
         </div>
       </div>
-      <button class="logout-btn">➔</button>
-    </div>
+
+      <svg *ngIf="!isCollapsed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-slate-500 transition-colors group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
+    </button>
   </div>
-</aside>
+</div>

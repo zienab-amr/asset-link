@@ -13,11 +13,6 @@ const createPayment = async (bookingId, billingData) => {
     if (booking.status !== "Confirmed") {
         throw new Error("Booking is not confirmed");
     }
-    const existingPayment = await Payment.findOne({ bookingId });
-
-    if (existingPayment) {
-        throw new Error("Booking already paid");
-    }
 
     const contractData = await Contract.findOne({ bookingId });
     if (!contractData) {
@@ -25,6 +20,13 @@ const createPayment = async (bookingId, billingData) => {
     }
 
     const totalToPay = contractData.totalPrice + contractData.securityDeposit;
+
+    let existingPayment = await Payment.findOne({ bookingId });
+
+    // لو فيه دفعة سابقة اكتملت فعلاً، امنعي الدفع تاني
+    if (existingPayment && existingPayment.paymentStatus === "Completed") {
+        throw new Error("Booking already paid");
+    }
 
     const merchantOrderId = `${bookingId}-${Date.now()}`;
 
@@ -34,15 +36,29 @@ const createPayment = async (bookingId, billingData) => {
         billingData,
     });
 
-    const payment = await Payment.create({
-        bookingId: booking._id,
-        companyId: booking.companyId,
-        amount: totalToPay,
-        merchantOrderId,
-        paymobOrderId,
-        paymentKey,
-        paymentStatus: "Pending",
-    });
+    let payment;
+
+    if (existingPayment) {
+        // فيه محاولة قديمة Pending أو Failed - بنحدثها بمحاولة جديدة بدل ما نمنع المستخدم
+        existingPayment.amount = totalToPay;
+        existingPayment.merchantOrderId = merchantOrderId;
+        existingPayment.paymobOrderId = paymobOrderId;
+        existingPayment.paymentKey = paymentKey;
+        existingPayment.paymentStatus = "Pending";
+        existingPayment.transactionId = undefined;
+        existingPayment.paidAt = undefined;
+        payment = await existingPayment.save();
+    } else {
+        payment = await Payment.create({
+            bookingId: booking._id,
+            companyId: booking.companyId,
+            amount: totalToPay,
+            merchantOrderId,
+            paymobOrderId,
+            paymentKey,
+            paymentStatus: "Pending",
+        });
+    }
 
     return { payment, iframeUrl };
 };
