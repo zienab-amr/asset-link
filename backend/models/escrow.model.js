@@ -77,6 +77,35 @@ const escrowSchema = new mongoose.Schema(
     type: Date,
     default: Date.now,
     },
+
+    // NEW: tracks whether the rental amount has been paid out to the owner company
+    rentalReleased: {
+        type: Boolean,
+        default: false,
+    },
+
+    // NEW: timestamp of when the rental amount was released to the owner
+    rentalReleasedAt: {
+        type: Date,
+    },
+
+    // NEW: tracks whether the remaining security deposit has been refunded to the renter
+    depositRefunded: {
+        type: Boolean,
+        default: false,
+    },
+
+    // NEW: timestamp of when the deposit was refunded to the renter
+    depositRefundedAt: {
+        type: Date,
+    },
+
+    // NEW: the deposit amount actually refunded (may be less than securityDeposit
+    // if a penalty was deducted for damage), kept for a clear audit trail
+    depositRefundedAmount: {
+        type: Number,
+        min: 0,
+    },
 },
 {
     timestamps: true,

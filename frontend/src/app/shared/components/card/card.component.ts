@@ -33,7 +33,7 @@ export class CardComponent {
     if (event && event.stopPropagation) {
       event.stopPropagation();
     }
-    
+
     if (this.isRentedOrBooked) {
       this.waitlistClick.emit();
     } else {
@@ -52,8 +52,16 @@ export class CardComponent {
     return this.status === 'Available';
   }
 
+  // FIX: backend also sets asset status to "In Rental" (see booking.service.js
+  // and inspection.service.js), not just "Booked" or "Rented".
+  // Without including it here, assets with this status fell through to the
+  // "Unavailable" branch and blocked users from joining the waiting list.
   get isRentedOrBooked(): boolean {
-    return this.status === 'Booked' || this.status === 'Rented';
+    return (
+      this.status === 'Booked' ||
+      this.status === 'Rented' ||
+      this.status === 'In Rental'
+    );
   }
 
   get priceValue(): string {
@@ -71,6 +79,7 @@ export class CardComponent {
 
       case 'Booked':
       case 'Rented':
+      case 'In Rental':
         return 'bg-blue-100 text-blue-700';
 
       case 'Inspection':

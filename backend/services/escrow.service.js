@@ -209,7 +209,11 @@ const freezeMoney = async (escrowId) => {
   return await updateEscrowStatus(escrowId, "Frozen");
 };
 
-// RELEASE money to the owner company
+// RELEASE money — now splits into two clear parts:
+// 1. rentalAmount goes to the owner company (the payment for the rental itself)
+// 2. the remaining securityDeposit (after any penalty deduction) is refunded back
+//    to the renter company. Both are tracked separately on the escrow document
+//    so the frontend can show "You paid X, you'll get Y deposit back" clearly.
 const releaseMoney = async (bookingId) => {
   if (!mongoose.isValidObjectId(bookingId)) throw makeError("Invalid bookingId", 400);
 
@@ -240,9 +244,23 @@ const releaseMoney = async (bookingId) => {
       if (FINAL_STATUSES.includes(escrow.status)) {
         throw makeError("Escrow is already finalized, status cannot be changed", 400);
       }
+
+      const now = new Date();
+
       releasedEscrow = await escrowModel.findByIdAndUpdate(
         escrow._id,
-        { status: "Released" },
+        {
+          status: "Released",
+          // rental amount payout to the owner company
+          rentalReleased: true,
+          rentalReleasedAt: now,
+          // remaining security deposit refund to the renter company
+          // (escrow.securityDeposit already reflects any prior penalty deduction
+          // from deductPenaltyFromDeposit, so this is the correct final amount)
+          depositRefunded: true,
+          depositRefundedAt: now,
+          depositRefundedAmount: escrow.securityDeposit,
+        },
         { new: true, session }
       );
     });
