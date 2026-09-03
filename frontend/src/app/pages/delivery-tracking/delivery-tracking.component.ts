@@ -65,7 +65,6 @@ export class DeliveryTrackingComponent implements OnInit {
     });
   }
 
-  // Owner: the renting company (companyId) that placed the booking
   // Owner: the asset owner (ownerCompanyId) shipping the equipment out
   isOwner(): boolean {
     if (!this.selectedDelivery?.bookingId) return false;
@@ -74,23 +73,10 @@ export class DeliveryTrackingComponent implements OnInit {
     return this.companyId === ownerId;
   }
 
-  isRenter(): boolean {
-    if (!this.selectedDelivery?.bookingId) return false;
-    const renterId = this.selectedDelivery.bookingId.companyId?._id
-      || this.selectedDelivery.bookingId.companyId;
-    return this.companyId === renterId;
-  }
-
-  // FIX: only the owner can move Preparing -> Picked Up -> In Transit.
-  // The final "Delivered" confirmation must come from the renter, since the
-  // owner cannot self-confirm that the equipment actually arrived.
+  // Only the owner can advance delivery status, including the final
+  // "Delivered" confirmation. The renter has no confirmation role here.
   canUpdateStatus(): boolean {
     if (!this.selectedDelivery) return false;
-
-    if (this.selectedDelivery.status === 'In Transit') {
-      return this.isRenter();
-    }
-
     return this.isOwner();
   }
 
@@ -150,7 +136,7 @@ export class DeliveryTrackingComponent implements OnInit {
       };
     }
 
-    // Delivered to renter
+    // Delivered to renter (confirmed by owner)
     if (this.selectedDelivery.status === 'Delivered') {
       return {
         label: 'With Renter',

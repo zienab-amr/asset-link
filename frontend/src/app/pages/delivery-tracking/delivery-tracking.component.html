@@ -10,6 +10,8 @@
       </p>
     </div>
 
+    <!-- Only the owner sees the update button; there is no renter-side
+         confirmation step anymore -->
     <div class="flex gap-3" *ngIf="selectedDelivery">
       <button
         *ngIf="selectedDelivery.status !== 'Delivered' && canUpdateStatus()"
@@ -18,13 +20,6 @@
       >
         Update to: {{ getNextStatusText() }}
       </button>
-
-      <span
-        *ngIf="selectedDelivery.status === 'In Transit' && !canUpdateStatus() && isOwner()"
-        class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200"
-      >
-        ⏳ Waiting for renter to confirm delivery
-      </span>
     </div>
   </div>
 
