@@ -41,10 +41,10 @@ const createDelivery = async (deliveryData) => {
   if (contract.status !== "Active" && contract.status !== "Approved") {
     throw new Error("Contract must be Active or Approved");
   }
-  
+
   if (booking.status !== "Confirmed") {
     throw new Error("Booking must be confirmed");
-}
+  }
 
   if (String(contract.bookingId) !== String(bookingId)) {
     throw new Error("Booking does not belong to this contract");
@@ -59,42 +59,33 @@ const createDelivery = async (deliveryData) => {
   }
 
   // ===============================
-// Validate Escrow
-// ===============================
+  // Validate Escrow
+  // ===============================
 
-const escrow = await escrowService.getEscrowByBooking(bookingId);
+  const escrow = await escrowService.getEscrowByBooking(bookingId);
 
-if (!escrow) {
-  throw new Error("Escrow not found");
-}
+  if (!escrow) {
+    throw new Error("Escrow not found");
+  }
 
-if (escrow.status !== "Held") {
-  throw new Error(
-    "Delivery cannot be created until payment is completed and escrow is held"
-  );
-}
+  if (escrow.status !== "Held") {
+    throw new Error(
+      "Delivery cannot be created until payment is completed and escrow is held"
+    );
+  }
 
   const deliveryCode = await generateDeliveryCode();
 
   const delivery = new deliveryModel({
     deliveryCode,
-
     bookingId,
-
     contractId,
-
     pickupLocation,
-
     deliveryLocation,
-
     driverName,
-
     driverPhone,
-
     estimatedArrival,
-
     status: "Preparing",
-
     statusHistory: [
       {
         status: "Preparing",
@@ -107,10 +98,19 @@ if (escrow.status !== "Held") {
 
   return delivery;
 };
+
+// Shared nested-populate config so bookingId.companyId and
+// bookingId.ownerCompanyId come back as full objects, not just IDs.
+// The frontend's isOwner()/isRenter() checks rely on this.
+const BOOKING_POPULATE = {
+  path: "bookingId",
+  populate: [{ path: "companyId" }, { path: "ownerCompanyId" }],
+};
+
 const getDeliveryById = async (id) => {
   const delivery = await deliveryModel
     .findById(id)
-    .populate("bookingId")
+    .populate(BOOKING_POPULATE)
     .populate("contractId");
 
   if (!delivery) {
@@ -149,7 +149,6 @@ const updateDeliveryStatus = async (id, statusData) => {
 
   delivery.statusHistory.push({
     status,
-
     changedAt: new Date(),
   });
 
@@ -164,6 +163,7 @@ const updateDeliveryStatus = async (id, statusData) => {
 
   return delivery;
 };
+
 const getDeliveryTimeline = async (id) => {
   const delivery = await deliveryModel.findById(id);
 
@@ -177,7 +177,7 @@ const getDeliveryTimeline = async (id) => {
 const getDeliveryHistory = async () => {
   const deliveries = await deliveryModel
     .find()
-    .populate("bookingId")
+    .populate(BOOKING_POPULATE)
     .populate("contractId")
     .sort({ createdAt: -1 });
 
@@ -186,12 +186,8 @@ const getDeliveryHistory = async () => {
 
 module.exports = {
   createDelivery,
-
   getDeliveryById,
-
   updateDeliveryStatus,
-
   getDeliveryTimeline,
-
   getDeliveryHistory,
 };

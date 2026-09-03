@@ -10,9 +10,11 @@
       </p>
     </div>
 
+    <!-- Only the owner sees the update button; there is no renter-side
+         confirmation step anymore -->
     <div class="flex gap-3" *ngIf="selectedDelivery">
       <button
-        *ngIf="selectedDelivery.status !== 'Delivered'"
+        *ngIf="selectedDelivery.status !== 'Delivered' && canUpdateStatus()"
         (click)="updateNextStatus()"
         class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700"
       >

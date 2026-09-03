@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DeliveryService } from '../../services/delivery.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-delivery-tracking',
@@ -10,10 +11,16 @@ export class DeliveryTrackingComponent implements OnInit {
   deliveries: any[] = [];
   selectedDelivery: any = null;
   timeline: any[] = [];
+  companyId = '';
 
-  constructor(private deliveryService: DeliveryService) {}
+  constructor(
+    private deliveryService: DeliveryService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    const company = this.authService.getCompany();
+    this.companyId = company?._id || company?.id || '';
     this.loadDeliveryHistory();
   }
 
@@ -23,13 +30,13 @@ export class DeliveryTrackingComponent implements OnInit {
         this.deliveries = response;
         if (this.deliveries.length > 0) {
           if (this.selectedDelivery) {
-            // البحث عن الشحنة المحددة حالياً للثبات عليها بعد التحديث
+            // Keep the currently selected delivery selected after a refresh
             const current = this.deliveries.find(
               (d) => d._id === this.selectedDelivery._id,
             );
             this.selectDelivery(current || this.deliveries[0]);
           } else {
-            // اختيار أول شحنة فقط في أول مرة تفتح فيها الشاشة
+            // Only auto-select the first delivery the first time the page loads
             this.selectDelivery(this.deliveries[0]);
           }
         } else {
@@ -58,8 +65,24 @@ export class DeliveryTrackingComponent implements OnInit {
     });
   }
 
+  // Owner: the asset owner (ownerCompanyId) shipping the equipment out
+  isOwner(): boolean {
+    if (!this.selectedDelivery?.bookingId) return false;
+    const ownerId = this.selectedDelivery.bookingId.ownerCompanyId?._id
+      || this.selectedDelivery.bookingId.ownerCompanyId;
+    return this.companyId === ownerId;
+  }
+
+  // Only the owner can advance delivery status, including the final
+  // "Delivered" confirmation. The renter has no confirmation role here.
+  canUpdateStatus(): boolean {
+    if (!this.selectedDelivery) return false;
+    return this.isOwner();
+  }
+
   updateNextStatus(): void {
-    if (!this.selectedDelivery) return;
+    if (!this.selectedDelivery || !this.canUpdateStatus()) return;
+
     const statuses = ['Preparing', 'Picked Up', 'In Transit', 'Delivered'];
     const currentIndex = statuses.indexOf(this.selectedDelivery.status);
 
@@ -84,8 +107,9 @@ export class DeliveryTrackingComponent implements OnInit {
   }
 
   /**
-   * بتحدد فين المعدة دلوقتي بناءً على حالة الـ delivery والـ booking المرتبط بيها.
-   * بترجع كائن فيه النص والحالة (owner/renter/closed) عشان نلوّن الكارت في الـ HTML.
+   * Determines where the asset currently is based on the delivery status and
+   * the linked booking. Returned as an object with label/holder/description
+   * so the HTML can color the card accordingly.
    */
   getAssetLocation(): { label: string; holder: 'company' | 'renter' | 'closed'; description: string } {
     if (!this.selectedDelivery) {
@@ -94,7 +118,7 @@ export class DeliveryTrackingComponent implements OnInit {
 
     const booking = this.selectedDelivery.bookingId;
 
-    // الإيجار اتقفل بالكامل
+    // Rental fully closed
     if (booking?.status === 'Completed') {
       return {
         label: 'Rental Completed',
@@ -103,7 +127,7 @@ export class DeliveryTrackingComponent implements OnInit {
       };
     }
 
-    // اترجعت للشركة وبتستنى فحص after_use
+    // Returned by renter, awaiting final inspection
     if (booking?.returnedAt) {
       return {
         label: 'With Company',
@@ -112,7 +136,7 @@ export class DeliveryTrackingComponent implements OnInit {
       };
     }
 
-    // اتسلمت للمستأجر
+    // Delivered to renter (confirmed by owner)
     if (this.selectedDelivery.status === 'Delivered') {
       return {
         label: 'With Renter',
@@ -121,7 +145,7 @@ export class DeliveryTrackingComponent implements OnInit {
       };
     }
 
-    // لسه في مرحلة التجهيز/النقل، يعني لسه مع الشركة
+    // Still being prepared/shipped, so still with the company
     return {
       label: 'With Company',
       holder: 'company',

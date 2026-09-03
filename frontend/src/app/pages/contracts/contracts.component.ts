@@ -8,6 +8,7 @@ import { DeliveryService } from '../../services/delivery.service';
 import { RentalCompletionService } from '../../services/rental-completion.service';
 import { PenaltyService } from '../../services/penalty.service';
 import { DamageReportService } from '../../services/damage-report.service';
+import { EscrowService, EscrowRecord } from '../../services/escrow.service';
 
 @Component({
   selector: 'app-contracts',
@@ -36,6 +37,10 @@ export class ContractsComponent implements OnInit, OnDestroy {
     estimatedArrival: ''
   };
 
+  // Delivery existence check state
+  deliveryExists = false;
+  loadingDeliveryStatus = false;
+
   // Payment Popup State
   currentPaymentId: string | null = null;
   private paymentPopup: Window | null = null;
@@ -45,6 +50,10 @@ export class ContractsComponent implements OnInit, OnDestroy {
   damageReport: any = null;
   loadingDamageReport = false;
   penaltyLoading = false;
+  
+  // Escrow breakdown, shown so renters/owners understand rental payout vs deposit refund
+escrowInfo: EscrowRecord | null = null;
+loadingEscrowInfo = false;
 
   statusOptions = ['All', 'Draft', 'Active', 'Approved', 'Rejected', 'Completed'];
 
@@ -64,7 +73,8 @@ export class ContractsComponent implements OnInit, OnDestroy {
     private deliveryService: DeliveryService,
     private rentalCompletionService: RentalCompletionService,
     private penaltyService: PenaltyService,
-    private damageReportService: DamageReportService
+    private damageReportService: DamageReportService,
+    private escrowService: EscrowService
   ) {}
 
   ngOnInit(): void {
@@ -94,11 +104,14 @@ export class ContractsComponent implements OnInit, OnDestroy {
         this.applyFilter();
         this.isLoading = false;
 
+        // Keep the currently open panel in sync with fresh data
         if (this.selectedContract) {
           const refreshed = this.contracts.find((c) => c._id === this.selectedContract._id);
           if (refreshed) {
             this.selectedContract = refreshed;
             this.checkDamageReport();
+            this.checkDeliveryStatus();
+                this.loadEscrowInfo();
           }
         }
       },
@@ -134,11 +147,15 @@ export class ContractsComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.damageReport = null;
     this.checkDamageReport();
+    this.checkDeliveryStatus();
+    this.loadEscrowInfo();
   }
 
   closePanel() {
     this.selectedContract = null;
     this.damageReport = null;
+    this.deliveryExists = false;
+      this.escrowInfo = null;
   }
 
   isOwner(contract: any): boolean {
@@ -271,7 +288,7 @@ export class ContractsComponent implements OnInit, OnDestroy {
           }
         },
         error: () => {
-          // بنتجاهل الأخطاء المؤقتة ومنوقفش الـ polling عليها
+          // Ignore transient polling errors, keep polling
         }
       });
   }
@@ -316,6 +333,7 @@ export class ContractsComponent implements OnInit, OnDestroy {
         this.actionLoading = false;
         this.successMessage = 'Delivery initiated successfully!';
         this.showDeliveryModal = false;
+        this.deliveryExists = true;
       },
       error: (err: any) => {
         this.actionLoading = false;
@@ -374,6 +392,30 @@ export class ContractsComponent implements OnInit, OnDestroy {
     return !!this.selectedContract?.bookingId?.returnedAt;
   }
 
+  // Checks whether a delivery already exists for this contract's booking,
+  // so the "Create Delivery" button does not keep showing after it was already created.
+  checkDeliveryStatus(): void {
+    if (!this.selectedContract) {
+      this.deliveryExists = false;
+      return;
+    }
+
+    this.loadingDeliveryStatus = true;
+    this.deliveryService.getDeliveryHistory().subscribe({
+      next: (deliveries: any[]) => {
+        this.deliveryExists = (deliveries || []).some((d: any) => {
+          const dBookingId = d.bookingId?._id || d.bookingId;
+          return dBookingId === this.bookingId;
+        });
+        this.loadingDeliveryStatus = false;
+      },
+      error: () => {
+        this.deliveryExists = false;
+        this.loadingDeliveryStatus = false;
+      },
+    });
+  }
+
   checkDamageReport(): void {
     if (!this.selectedContract || !this.isReturned) {
       this.damageReport = null;
@@ -392,6 +434,26 @@ export class ContractsComponent implements OnInit, OnDestroy {
       },
     });
   }
+  
+  // Loads escrow so we can clearly show: rental amount -> owner, deposit -> renter
+loadEscrowInfo(): void {
+  if (!this.selectedContract) {
+    this.escrowInfo = null;
+    return;
+  }
+
+  this.loadingEscrowInfo = true;
+  this.escrowService.getEscrowByBooking(this.bookingId).subscribe({
+    next: (escrow) => {
+      this.escrowInfo = escrow;
+      this.loadingEscrowInfo = false;
+    },
+    error: () => {
+      this.escrowInfo = null;
+      this.loadingEscrowInfo = false;
+    },
+  });
+}
 
   returnAsset(): void {
     if (!this.selectedContract) return;
