@@ -132,8 +132,12 @@ fetchAssetDetails() {
   }
 
   get isWaitlistMode(): boolean {
-    return this.selectedAsset?.status === 'Booked' || this.selectedAsset?.status === 'Rented';
-  }
+  return (
+    this.selectedAsset?.status === 'Booked' || 
+    this.selectedAsset?.status === 'Rented' || 
+    this.selectedAsset?.status === 'In Rental'
+  );
+}
 
   get minRequiredDays(): number {
     if (this.priceType === 'Weekly') return 7;

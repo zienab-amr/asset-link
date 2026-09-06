@@ -30,16 +30,16 @@ export class CardComponent {
   @Output() detailsClick = new EventEmitter<void>();
 
   onBookClick(event: any) {
-    if (event && event.stopPropagation) {
-      event.stopPropagation();
-    }
-
-    if (this.isRentedOrBooked) {
-      this.waitlistClick.emit();
-    } else {
-      this.bookClick.emit();
-    }
+  if (event && event.stopPropagation) {
+    event.stopPropagation();
   }
+  
+  if (this.isRentedOrBooked) {
+    this.waitlistClick.emit();
+  } else {
+    this.bookClick.emit();
+  }
+}
 
   onDetailsClick(event: any) {
     if (event && event.stopPropagation) {
@@ -57,12 +57,12 @@ export class CardComponent {
   // Without including it here, assets with this status fell through to the
   // "Unavailable" branch and blocked users from joining the waiting list.
   get isRentedOrBooked(): boolean {
-    return (
-      this.status === 'Booked' ||
-      this.status === 'Rented' ||
-      this.status === 'In Rental'
-    );
-  }
+  return (
+    this.status === 'Booked' ||
+    this.status === 'Rented' ||
+    this.status === 'In Rental'
+  );
+}
 
   get priceValue(): string {
     return this.price.split('/')[0];
@@ -94,18 +94,18 @@ export class CardComponent {
   }
 
   get buttonText(): string {
-    if (this.isRentedOrBooked) {
-      return 'Join Waitlist';
-    }
-    return this.isAvailable ? 'Book Now' : 'Unavailable';
+  if (this.isRentedOrBooked) {
+    return 'Join Waitlist';
   }
+  return this.isAvailable ? 'Book Now' : 'Unavailable';
+}
 
   get buttonVariant(): any {
-    if (this.isRentedOrBooked) {
-      return 'success'; // Green button for Join Waitlist
-    }
-    return this.isAvailable ? 'primary' : 'secondary';
+  if (this.isRentedOrBooked) {
+    return 'success'; 
   }
+  return this.isAvailable ? 'primary' : 'secondary';
+}
 
   get categoryIcon(): string {
     const cat = (this.subtitle || '').toLowerCase();

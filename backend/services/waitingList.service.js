@@ -73,7 +73,10 @@ const notifyFirstWaitingCompany = async (assetId) => {
       status: "Waiting",
     })
     .populate("companyId")
-    .populate("assetId")
+    .populate({
+    path: "assetId",
+    populate: { path: "companyId" } 
+    })
     .sort({ position: 1 });
 
   if (!waiting) {
